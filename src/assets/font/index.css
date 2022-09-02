@@ -1,0 +1,6 @@
+@font-face {
+  font-family: "阿里妈妈数黑体 Bold";font-weight: 700;
+  src: url("./Alimama_ShuHeiTi_Bold.woff2") format("woff2"),
+  url("./Alimama_ShuHeiTi_Bold.woff") format("woff");
+  font-display: swap;
+}

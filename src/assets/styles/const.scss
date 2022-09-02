@@ -1,0 +1,20 @@
+/*theme主题*/
+$theme-bg:#ddd;
+$theme-box:#fff;
+
+html,body{
+  height:100vh;
+  width:100vw;
+
+  
+  /*vant组件*/
+  //navbar
+  --van-nav-bar-height:40px;
+  --van-nav-bar-title-text-color:#fff;
+  --van-nav-bar-background-color:#313132;
+  //--van-nav-bar-title-font-size:44px;
+  //van-tabbar
+  --van-tabbar-height:60px;
+  --van-tabbar-item-icon-size:22px;
+  --van-tabbar-item-font-size:normal;
+}
