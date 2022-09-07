@@ -13,7 +13,7 @@
             <span>心率</span>
           </div>
           <div class="desc">
-            <span class="value">{{hrData}}</span>
+            <span class="value">{{heartRateData}}</span>
             <span class="unit">次/每分钟</span>
           </div>
         </van-col>
@@ -32,7 +32,7 @@
             <span>体温</span>
           </div>
           <div class="desc">
-            <span class="value">36.7</span>
+            <span class="value">{{temperatureData}}</span>
             <span class="unit">℃</span>
           </div>
         </van-col>
@@ -51,7 +51,7 @@
             <span>步数</span>
           </div>
           <div class="desc">
-            <span class="value">70</span>
+            <span class="value">{{stepsData}}</span>
             <span class="unit">步</span>
           </div>
         </van-col>
@@ -59,29 +59,38 @@
     </div>
     <div style="padding:15px;">
       <van-button type="primary" round
-        @touchend="reqHeartRate">
-        refresh</van-button>
+        @touchend="acquireHeartRate"
+        >
+        心率</van-button>
     </div>
     <div style="padding:15px;">
       <van-button type="primary" round
-        @touchend="hrData++">
-        touch</van-button>
+        @touchend="acquireTemperature">
+        温度</van-button>
+    </div>
+    <div style="padding:15px;">
+      <van-button type="primary" round
+        @touchend="acquireSteps">
+        步数</van-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+  // 图标
   import {HeartRate, Thermometer,Foot} from "@icon-park/vue-next"
-  import {useHeartRateStore} from "@/stores/heartRateStore"
-  import {HeartRateReq} from "@/api/types"
-  import {ref} from "vue"
+  import {useHealthStore} from "@/stores/healthStore"
+  import {HeartRateReq, TemperatureReq, StepsReq} from "@/api/types"
+  import {onMounted, ref} from "vue"
   import type {Ref} from "vue"
 
-  //心率store
-  const heartRateStore = useHeartRateStore();
-  //心率
-  const hrData:Ref<number> = ref(0);
+  //store
+  var healthStore = useHealthStore();
 
-  async function reqHeartRate(){
+  /* HeartRate */
+  //data
+  const heartRateData:Ref<number> = ref(0);
+  //method
+  async function acquireHeartRate(){
     try {
       const params:HeartRateReq = {
         AccessToken:"1234",
@@ -89,12 +98,52 @@
         BeginTime:"1234",
         EndTime:"1234"
       }
-      await heartRateStore.reqHeartRate(params);
-      
+      await healthStore.reqHeartRate(params);
+      heartRateData.value = healthStore.heartRates[0].HeartRate
     } catch (error) {
-      console.log('error',error)
+      //TODO: Toast
+      //console.log('Toast',error)
     }
   }
+  const temperatureData:Ref<number> = ref(0);
+  async function acquireTemperature(){
+    try {
+      const params:TemperatureReq = {
+        AccessToken:"1234",
+        Imei:"1234",
+        BeginTime:"1234",
+        EndTime:"1234"
+      }
+      await healthStore.reqTemperature(params);
+      temperatureData.value = healthStore.temperatures[0].Temperature;
+    } catch (error) {
+      //TODO:Toast
+      // console.log('error',error)
+    }
+  }
+  const stepsData:Ref<number> = ref(0)
+  async function acquireSteps(){
+    try {
+      const params:StepsReq = {
+        AccessToken:"1234",
+        Imei:"1234",
+        BeginTime:"1234",
+        EndTime:"1234"
+      }
+      await healthStore.reqSteps(params);
+      stepsData.value = healthStore.steps[0].Steps;
+    } catch (error) {
+      //TODO:Toast
+      // console.log('error',error)
+    }
+  }
+  onMounted(()=>{
+    setInterval(async ()=>{
+      await acquireHeartRate();
+      await acquireTemperature();
+      await acquireSteps();
+    },3000)
+  })
 
 </script>
 

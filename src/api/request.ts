@@ -1,23 +1,36 @@
-import axios, {AxiosInterceptorManager} from "axios";
+import axios, {AxiosRequestConfig} from "axios";
 
-export const request = axios.create({
-  baseURL:"http://127.0.0.1:4523/m1/1514334-0-default",
+import { MyResponse } from "./types";
+
+const instance = axios.create({
+  baseURL:"http://127.0.0.1:4523/mock/1514334",
   timeout: 1000,
 })
 
-request.interceptors.request.use((config)=>{
+instance.interceptors.request.use((config)=>{
   //@ts-ignore
   config.headers["Authorization"] ="1234"
   return config;
 },(error)=>{
-  console.log('error',error)
   return Promise.reject(error)
 })
 
 
-request.interceptors.response.use((response)=>{
-  return response.data;
+instance.interceptors.response.use((response)=>{
+  return response;
 },(error)=>{
   console.log('error',error)
   return Promise.reject(error)
 })
+export const request = async <T>(config: AxiosRequestConfig)=>{
+  try {
+    // AxiosInstance.request 方法提供了泛型 用于指定 response.data 的类型
+    const {data} = await instance.request<MyResponse<T>>(config);
+    console.log('data',data)
+    return data.Code === 1
+      ? data
+      : Promise.reject(data.Message)
+  } catch (error) {
+    return Promise.reject(error)
+  }
+}
