@@ -7,6 +7,12 @@
   
   <van-button class="cmdBtn" type="primary" round size="small"  @touchend="trySendHealthCommand">开始检测</van-button>
 
+
+  <!-- TODO: todelete -->
+  <div>
+    imei: {{authStore.Imei}}
+  </div>
+  
   <div id="ht">
     <!-- 心率 -->
     <div class="card card-heart">
