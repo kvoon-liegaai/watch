@@ -542,6 +542,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/web-bluetooth@^0.0.15":
+  "integrity" "sha512-w7hEHXnPMEZ+4nGKl/KDRVpxkwYxYExuHOYXyzIzCDzEZ9ZCGMAewulr9IqJu2LR4N37fcnb1XVeuZ09qgOxhA=="
+  "resolved" "https://registry.npmmirror.com/@types/web-bluetooth/-/web-bluetooth-0.0.15.tgz"
+  "version" "0.0.15"
+
 "@types/webpack-env@^1.15.2":
   "integrity" "sha512-56/MAlX5WMsPVbOg7tAxnYvNYMMWr/QJiIp6BxVSW3JJXUVzzOn64qW8TzQyMSqSUFM2+PVI4aUHcHOzIz/1tg=="
   "resolved" "https://registry.npmmirror.com/@types/webpack-env/-/webpack-env-1.18.0.tgz"
@@ -832,7 +837,7 @@
   optionalDependencies:
     "prettier" "^1.18.2 || ^2.0.0"
 
-"@vue/devtools-api@^6.0.0-beta.11", "@vue/devtools-api@^6.1.4", "@vue/devtools-api@^6.2.1":
+"@vue/devtools-api@^6.1.4", "@vue/devtools-api@^6.2.1":
   "integrity" "sha512-OEgAMeQXvCoJ+1x8WyQuVZzFo0wcyCmUR3baRVLmKBo1LmYZWMlRiXlux5jd0fqVJu6PfDbOrZItVqUEzLobeQ=="
   "resolved" "https://registry.npmmirror.com/@vue/devtools-api/-/devtools-api-6.2.1.tgz"
   "version" "6.2.1"
@@ -907,6 +912,28 @@
   "integrity" "sha512-Iu8Tbg3f+emIIMmI2ycSI8QcEuAUgPTgHwesDU1eKMLE4YC/c/sFbGc70QgMq31ijRftV0R7vCm9co6rldCeOA=="
   "resolved" "https://registry.npmmirror.com/@vue/web-component-wrapper/-/web-component-wrapper-1.3.0.tgz"
   "version" "1.3.0"
+
+"@vueuse/core@^9.2.0":
+  "integrity" "sha512-/MZ6qpz6uSyaXrtoeBWQzAKRG3N7CvfVWvQxiM3ei3Xe5ydOjjtVbo7lGl9p8dECV93j7W8s63A8H0kFLpLyxg=="
+  "resolved" "https://registry.npmmirror.com/@vueuse/core/-/core-9.2.0.tgz"
+  "version" "9.2.0"
+  dependencies:
+    "@types/web-bluetooth" "^0.0.15"
+    "@vueuse/metadata" "9.2.0"
+    "@vueuse/shared" "9.2.0"
+    "vue-demi" "*"
+
+"@vueuse/metadata@9.2.0":
+  "integrity" "sha512-exN4KE6iquxDCdt72BgEhb3tlOpECtD61AUdXnUqBTIUCl70x1Ar/QXo3bYcvxmdMS2/peQyfeTzBjRTpvL5xw=="
+  "resolved" "https://registry.npmmirror.com/@vueuse/metadata/-/metadata-9.2.0.tgz"
+  "version" "9.2.0"
+
+"@vueuse/shared@9.2.0":
+  "integrity" "sha512-NnRp/noSWuXW0dKhZK5D0YLrDi0nmZ18UeEgwXQq7Ul5TTP93lcNnKjrHtd68j2xFB/l59yPGFlCryL692bnrA=="
+  "resolved" "https://registry.npmmirror.com/@vueuse/shared/-/shared-9.2.0.tgz"
+  "version" "9.2.0"
+  dependencies:
+    "vue-demi" "*"
 
 "@webassemblyjs/ast@1.11.1":
   "integrity" "sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw=="
@@ -1785,7 +1812,7 @@
   "resolved" "https://registry.npmmirror.com/css-declaration-sorter/-/css-declaration-sorter-6.3.0.tgz"
   "version" "6.3.0"
 
-"css-loader@*", "css-loader@^6.5.0":
+"css-loader@^6.5.0":
   "integrity" "sha512-yB5CNFa14MbPJcomwNh3wLThtkZgcNyI2bNMRt8iE5Z8Vwl7f8vQXFAzn2HDOJvtDq2NTZBUGMSUNNyrv3/+cw=="
   "resolved" "https://registry.npmmirror.com/css-loader/-/css-loader-6.7.1.tgz"
   "version" "6.7.1"
@@ -3361,6 +3388,11 @@
   "version" "3.1.0"
   dependencies:
     "semver" "^6.0.0"
+
+"md5-ts@^0.1.6":
+  "integrity" "sha512-xGl3IVril2ljBTTrSszfX7QDBzK9G7NBeFAMOBTB8oGlP3l90IRL4NEey65TQk/CuXTiw2qM28NWU2LiZIGOrg=="
+  "resolved" "https://registry.npmmirror.com/md5-ts/-/md5-ts-0.1.6.tgz"
+  "version" "0.1.6"
 
 "mdn-data@2.0.14":
   "integrity" "sha512-dn6wd0uw5GsdswPFfsgMp5NSB0/aDe6fK94YJV/AJDYXL6HVLWBsxeq7js7Ad+mU2K9LAlwpk6kN2D5mwCPVow=="
@@ -5024,6 +5056,11 @@
     "micromatch" "^4.0.0"
     "semver" "^7.3.4"
 
+"ts-md5@^1.3.1":
+  "integrity" "sha512-DiwiXfwvcTeZ5wCE0z+2A9EseZsztaiZtGrtSaY5JOD7ekPnR/GoIVD5gXZAlK9Na9Kvpo9Waz5rW64WKAWApg=="
+  "resolved" "https://registry.npmmirror.com/ts-md5/-/ts-md5-1.3.1.tgz"
+  "version" "1.3.1"
+
 "tslib@^1.8.1":
   "integrity" "sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg=="
   "resolved" "https://registry.npmmirror.com/tslib/-/tslib-1.14.1.tgz"
@@ -5200,7 +5237,7 @@
   "resolved" "https://registry.npmmirror.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz"
   "version" "1.9.1"
 
-"vue@^2 || ^3.2.13", "vue@^2.6.14 || ^3.2.0", "vue@^3.0.0", "vue@^3.0.0-0 || ^2.6.0", "vue@^3.0.2", "vue@^3.2.0", "vue@^3.2.13", "vue@3.2.38", "vue@3.x":
+"vue@^2 || ^3.2.13", "vue@^2.6.14 || ^3.2.0", "vue@^3.0.0", "vue@^3.0.0-0 || ^2.6.0", "vue@^3.2.0", "vue@^3.2.13", "vue@3.2.38", "vue@3.x":
   "integrity" "sha512-hHrScEFSmDAWL0cwO4B6WO7D3sALZPbfuThDsGBebthrNlDxdJZpGR3WB87VbjpPh96mep1+KzukYEhpHDFa8Q=="
   "resolved" "https://registry.npmmirror.com/vue/-/vue-3.2.38.tgz"
   "version" "3.2.38"
@@ -5210,13 +5247,6 @@
     "@vue/runtime-dom" "3.2.38"
     "@vue/server-renderer" "3.2.38"
     "@vue/shared" "3.2.38"
-
-"vuex@^4.0.0":
-  "integrity" "sha512-M6r8uxELjZIK8kTKDGgZTYX/ahzblnzC4isU1tpmEuOIIKmV+TRdc+H4s8ds2NuZ7wpUTdGRzJRtoj+lI+pc0Q=="
-  "resolved" "https://registry.npmmirror.com/vuex/-/vuex-4.0.2.tgz"
-  "version" "4.0.2"
-  dependencies:
-    "@vue/devtools-api" "^6.0.0-beta.11"
 
 "watchpack@^2.4.0":
   "integrity" "sha512-Lcvm7MGST/4fup+ifyKi2hjyIAwcdI4HRgtvTpIUxBRhB+RFtUh8XtDOxUfctVCnhVi+QQj49i91OyvzkJl6cg=="
@@ -5332,7 +5362,7 @@
   "resolved" "https://registry.npmmirror.com/webpack-virtual-modules/-/webpack-virtual-modules-0.4.4.tgz"
   "version" "0.4.4"
 
-"webpack@^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0", "webpack@^3.0.0 || ^4.1.0 || ^5.0.0-0", "webpack@^4.0.0 || ^5.0.0", "webpack@^4.1.0 || ^5.0.0-0", "webpack@^4.27.0 || ^5.0.0", "webpack@^4.37.0 || ^5.0.0", "webpack@^5.0.0", "webpack@^5.1.0", "webpack@^5.20.0", "webpack@^5.54.0", "webpack@>= 4", "webpack@>=2":
+"webpack@^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0", "webpack@^4.0.0 || ^5.0.0", "webpack@^4.1.0 || ^5.0.0-0", "webpack@^4.27.0 || ^5.0.0", "webpack@^4.37.0 || ^5.0.0", "webpack@^5.0.0", "webpack@^5.1.0", "webpack@^5.20.0", "webpack@^5.54.0", "webpack@>= 4", "webpack@>=2":
   "integrity" "sha512-A2InDwnhhGN4LYctJj6M1JEaGL7Luj6LOmyBHjcI8529cm5p6VXiTIW2sn6ffvEAKmveLzvu4jrihwXtPojlAA=="
   "resolved" "https://registry.npmmirror.com/webpack/-/webpack-5.74.0.tgz"
   "version" "5.74.0"

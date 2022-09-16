@@ -1,5 +1,5 @@
 <template>
-  <van-nav-bar title="标题" />
+  <van-nav-bar :title="title" />
   <div class="content">
     <router-view/>
   </div>
@@ -10,8 +10,19 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue"
-let active = ref("health");
+  import {ref,Ref} from "vue"
+  import {Title} from "@/types/"
+  import {useEventBus} from "@vueuse/core"
+  //激活的 tabbar item
+  let active = ref("health");
+  // title
+  let title:Ref<Title> = ref("健康");
+  // bus to change title 
+  const titleBus = useEventBus<Title>("titleBus")
+  const listener = (curTitle:Title) => {
+    title.value = curTitle
+  }
+  const unsubscribe = titleBus.on(listener)
 </script>
 
 <style lang="scss">

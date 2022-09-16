@@ -13,4 +13,15 @@ module.exports = {
       }
     }
   },
+  devServer: {
+    proxy: {  //配置跨域
+      '/api': {
+        target: 'http://openapi.miwitracker.com',
+        changOrigin: true,  //允许跨域
+        // pathRewrite: {
+        //   '^/v1/sessions': '' 
+        // },
+      },
+    }
+  }
 }

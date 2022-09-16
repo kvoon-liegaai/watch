@@ -18,9 +18,13 @@ import {
   NavBar,
   Button,
   Toast,
+  Notify,
+  Skeleton,
+  Overlay,
+  Loading
 } from "vant"
 
-const app = createApp(App)
+createApp(App)
   .use(createPinia())
   //.use(store)
   .use(router)
@@ -31,6 +35,9 @@ const app = createApp(App)
   .use(TabbarItem)
   .use(NavBar)
   .use(Button)
-app.config.globalProperties.$toast = Toast;
-
-app.mount('#app')
+  .use(Toast)
+  .use(Notify)
+  .use(Skeleton)
+  .use(Overlay)
+  .use(Loading)
+  .mount('#app')
