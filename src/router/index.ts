@@ -2,15 +2,28 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import HealthView from '../views/HealthView.vue'
 import MapView from "@/views/MapView.vue"
 import MdFiveView from "@/views/mdFiveView.vue"
+import BannedView from "@/views/BannedView.vue"
+
+import {useAuthStore} from "@/stores/authStore"
+
 const routes: Array<RouteRecordRaw> = [
   {
     path:"/",
-    redirect:"/health"
+    redirect:(to)=>{
+      return {name:"health"}
+    }
   },
   {
-    path: '/health',
+    path:"/banned",
+    name:"banned",
+    component:BannedView
+  },
+  {
+    //path: '/health/:imei',
+    path:'/health',
     name: 'health',
-    component: HealthView
+    component: HealthView,
+    // props:true,
   },
   {
     path: '/map',
@@ -19,7 +32,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/mdFiveview',
-    name:'mdFiveview',
+    name: 'mdFiveview',
     component: MdFiveView
   }
 ]
@@ -27,6 +40,22 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes
+})
+
+router.beforeEach((to, from, next)=>{
+  if(to.name == "banned"){
+    next();
+  }
+  if(!to.query.imei){
+    // 无 imei
+    next({name:'banned'})
+  }
+  else{
+    // 有 imei
+    const authStore = useAuthStore();
+    authStore.saveImei(to.query.imei as string);
+    next();
+  }
 })
 
 router.afterEach(()=>{

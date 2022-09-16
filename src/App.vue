@@ -3,16 +3,18 @@
   <div class="content">
     <router-view/>
   </div>
-  <van-tabbar placeholder class="tabbar" route v-model="active">
-    <van-tabbar-item replace to="/health" icon="like" name="health">健康</van-tabbar-item>
-    <van-tabbar-item replace to="/map" icon="map-marked" name="map">地图</van-tabbar-item>
+  <van-tabbar placeholder class="tabbar" route v-model="active" v-if="showTabbar">
+    <van-tabbar-item @touchend="switchPage('health')" icon="like" name="health">健康</van-tabbar-item>
+    <van-tabbar-item @touchend="switchPage('map')" icon="map-marked" name="map">地图</van-tabbar-item>
   </van-tabbar>
 </template>
 
 <script setup lang="ts">
-  import {ref,Ref} from "vue"
+  import {onMounted, ref,Ref, watchEffect} from "vue"
   import {Title} from "@/types/"
   import {useEventBus} from "@vueuse/core"
+  import router from "@/router"
+  import {useAuthStore} from "@/stores/authStore"
   //激活的 tabbar item
   let active = ref("health");
   // title
@@ -23,6 +25,28 @@
     title.value = curTitle
   }
   const unsubscribe = titleBus.on(listener)
+
+  // 是否展示tabbar
+  const showTabbar = ref<boolean>(true);
+  watchEffect(()=>{
+    if(title.value === "错误"){
+      showTabbar.value = false;
+    }
+    else{
+      showTabbar.value = true;
+    }
+  })
+  // tabbar 切换页面
+  function switchPage(name:string){
+    const authStore = useAuthStore()
+    router.push({
+      name,
+      query:{
+        imei:authStore.Imei
+      },
+      replace:true
+    })
+  }
 </script>
 
 <style lang="scss">

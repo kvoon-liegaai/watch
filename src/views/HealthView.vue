@@ -114,22 +114,6 @@
         </van-col>
       </van-row>
     </div>
-    <!-- <div style="padding:15px;">
-      <van-button type="primary" round
-        @touchend="acquireHeartRate"
-        >
-        心率</van-button>
-    </div>
-    <div style="padding:15px;">
-      <van-button type="primary" round
-        @touchend="acquireTemperature">
-        温度</van-button>
-    </div>
-    <div style="padding:15px;">
-      <van-button type="primary" round
-        @touchend="acquireSteps">
-        步数</van-button>
-    </div> -->
   </div>
 </template>
 <script setup lang="ts">
@@ -145,7 +129,7 @@
   // types
   import {CommandReq, DataReq, HeartRateReq, TemperatureReq, StepsReq,BloodPressureReq, BloodOxygenReq} from "@/api/types"
   // vue
-  import {onMounted, onUnmounted, ref} from "vue"
+  import {onMounted, onUnmounted, ref, defineProps} from "vue"
   import type {Ref} from "vue"
   // vueuse
   import {useEventBus} from "@vueuse/core"
@@ -156,12 +140,12 @@
   // utils time
   import {getBEdate} from "@/utils/date"
   
-  
+
   // 遮罩层
   let isLoading = ref<boolean>(false)
   /* 主动发起检测请求 */
   const authStore = useAuthStore();
-  async function trySendHealthCommand(){
+  async function trySendHealthCommand():Promise<void>{
     // prepare params for sendcommand
     const params:CommandReq = {
       AccessToken:getAccessToken(),
@@ -202,9 +186,9 @@
   //data
   const heartRateData:Ref<string> = ref("0");
   //method
-  async function acquireHeartRate(){
+  async function acquireHeartRate():Promise<void>{
     const params:HeartRateReq = getDataReq();
-    try {
+    try  {
       await healthStore.reqHeartRate(params);
 
       const length = healthStore.heartRates.length;
@@ -217,7 +201,7 @@
   
   /* Temperature */
   const temperatureData:Ref<number> = ref(0);
-  async function acquireTemperature(){
+  async function acquireTemperature():Promise<void>{
     const params:TemperatureReq = getDataReq();
     try {
       await healthStore.reqTemperature(params);
@@ -231,7 +215,7 @@
 
   /*Steps*/
   const stepsData:Ref<number> = ref(0)
-  async function acquireSteps(){
+  async function acquireSteps():Promise<void>{
     const params:StepsReq = getDataReq();
     try {
       await healthStore.reqSteps(params);
@@ -244,7 +228,7 @@
   /* Blood Pressure */
   const BloodPressureSystolicData = ref<number>(0); // 收缩压
   const BloodPressureDiastolicData = ref<number>(0); // 舒展压
-  async function acquireBloodPressure(){
+  async function acquireBloodPressure():Promise<void>{
     const params:BloodPressureReq = getDataReq();
     try {
       await healthStore.reqBloodPressure(params);
@@ -258,7 +242,7 @@
 
   /* Blood Oxygen */
   const BloodOxygenData = ref<number>(0)
-  async function acquireBloodOxygen(){
+  async function acquireBloodOxygen():Promise<void>{
     const params:BloodOxygenReq = getDataReq();
     try {
       await healthStore.reqBloodOxygen(params);
@@ -269,7 +253,7 @@
     }
   }
 
-  async function update(){
+  async function update():Promise<void>{
     try {
       await acquireHeartRate();
       await acquireTemperature();
@@ -301,7 +285,6 @@
 </script>
 
 <style lang="scss" scoped>
-
   // 发送命令按钮
   .cmdBtn{
     position: fixed;

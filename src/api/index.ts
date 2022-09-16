@@ -1,6 +1,7 @@
 import {request} from "./request"
 
 import {
+  MyResponse,
   CommandReq,
   TokenReq,TokenResult,
   HeartRateReq, HeartRateResult,
@@ -21,7 +22,7 @@ export const sendCommand = async (params:CommandReq)=>{
   })
 }
 
-export const getToken = async (params:TokenReq) => {
+export const getToken = async (params:TokenReq):Promise<MyResponse<TokenResult>> => {
   return await request<TokenResult>({
     url:"/token/get_token",
     method:"POST",
@@ -32,7 +33,7 @@ export const getToken = async (params:TokenReq) => {
   })
 }
 
-export const getHeartRateByTime = async (params:HeartRateReq)=>{
+export const getHeartRateByTime = async (params:HeartRateReq):Promise<MyResponse<HeartRateResult>> =>{
   return await request<HeartRateResult>({
     url:"/heartrate/get_heartrate_bytime",
     method:"POST",
@@ -43,7 +44,7 @@ export const getHeartRateByTime = async (params:HeartRateReq)=>{
   })
 }
 
-export const getTemperatureByTime = async (params:TemperatureReq)=>{
+export const getTemperatureByTime = async (params:TemperatureReq): Promise<MyResponse<TemperatureResult>>=>{
   return await request<TemperatureResult>({
     url:"/temperature/get_temperature_bytime",
     method:"POST",
@@ -54,7 +55,7 @@ export const getTemperatureByTime = async (params:TemperatureReq)=>{
   })
 }
 
-export const getStepsByTime = async (params: StepsReq) => {
+export const getStepsByTime = async (params: StepsReq):Promise<MyResponse<StepsResult>> => {
   return await request<StepsResult>({
     url:"/steps/get_steps_bytime",
     method:"POST",
@@ -65,7 +66,7 @@ export const getStepsByTime = async (params: StepsReq) => {
   })
 }
 
-export const getBloodPressureByTime = async (params:BloodPressureReq) => {
+export const getBloodPressureByTime = async (params:BloodPressureReq):Promise<MyResponse<BloodPressureResult>> => {
   return await request<BloodPressureResult>({
     url:"/bloodpressure/get_bloodpressure_bytime",
     method:"POST",
@@ -76,7 +77,7 @@ export const getBloodPressureByTime = async (params:BloodPressureReq) => {
   })
 }
 
-export const getBloodOxygenByTime = async (params:BloodOxygenReq) => {
+export const getBloodOxygenByTime = async (params:BloodOxygenReq):Promise<MyResponse<BloodOxygenResult>> => {
   return await request<BloodOxygenResult>({
     url:"/bloodoxygen/get_bloodoxygen_bytime",
     method:"POST",
