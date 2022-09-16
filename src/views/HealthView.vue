@@ -7,12 +7,6 @@
   
   <van-button class="cmdBtn" type="primary" round size="small"  @touchend="trySendHealthCommand">开始检测</van-button>
 
-
-  <!-- TODO: todelete -->
-  <div>
-    imei: {{authStore.Imei}}
-  </div>
-  
   <div id="ht">
     <!-- 心率 -->
     <div class="card card-heart">
@@ -124,6 +118,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
   // 图标
   import {HeartRate, Thermometer,Foot, Heart, Halo} from "@icon-park/vue-next"// icon park
