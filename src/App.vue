@@ -3,14 +3,14 @@
   <div class="content">
     <router-view/>
   </div>
-  <van-tabbar placeholder class="tabbar" route v-model="active" v-if="showTabbar">
+  <van-tabbar placeholder class="tabbar" v-model="active" v-if="showTabbar">
     <van-tabbar-item @touchend="switchPage('health')" icon="like" name="health">健康</van-tabbar-item>
     <van-tabbar-item @touchend="switchPage('map')" icon="map-marked" name="map">地图</van-tabbar-item>
   </van-tabbar>
 </template>
 
 <script setup lang="ts">
-  import {onMounted, ref,Ref, watchEffect} from "vue"
+  import {ref,Ref, watchEffect} from "vue"
   import {Title} from "@/types/"
   import {useEventBus} from "@vueuse/core"
   import router from "@/router"
@@ -46,6 +46,7 @@
       },
       replace:true
     })
+    active.value = name;
   }
 </script>
 

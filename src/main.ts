@@ -8,6 +8,7 @@ import 'vant/lib/index.css';
 import "@icon-park/vue-next/styles/index.css"
 import "@/assets/font/index.css"
 
+
 import {createPinia} from "pinia"
 
 import {
