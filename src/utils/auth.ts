@@ -1,5 +1,6 @@
 import {TokenResult} from "@/api/types"
 
+
 /* token */
 // save token
 export function setToken(tokenResult: TokenResult){

@@ -141,9 +141,8 @@
   // token
   import {reqToken} from "@/utils/reqToken"
   import {getAccessToken, getUserId} from "@/utils/auth"
-  // utils time
-  import {getBEdate} from "@/utils/date"
-  
+  // utils
+  import {genReqParams as getDataReq}  from "@/utils/genReqParams"// 获取请求参数
 
   // 遮罩层
   let isLoading = ref<boolean>(false)
@@ -171,18 +170,6 @@
     }
     await update();
   }
-  // 获取请求 params
-  function getDataReq():DataReq{
-    const AccessToken = getAccessToken();
-    const {BeginTime, EndTime} = getBEdate();
-    const params: DataReq = {
-      AccessToken,
-      Imei:authStore.Imei,
-      BeginTime,
-      EndTime
-    }
-    return params;
-  }
   
   //store
   const healthStore = useHealthStore();
@@ -191,7 +178,7 @@
   const heartRateData:Ref<string> = ref("0");
   //method
   async function acquireHeartRate():Promise<void>{
-    const params:HeartRateReq = getDataReq();
+    const params:HeartRateReq = getDataReq<HeartRateReq>();
     try  {
       await healthStore.reqHeartRate(params);
 
@@ -206,7 +193,7 @@
   /* Temperature */
   const temperatureData:Ref<number> = ref(0);
   async function acquireTemperature():Promise<void>{
-    const params:TemperatureReq = getDataReq();
+    const params:TemperatureReq = getDataReq<TemperatureReq>();
     try {
       await healthStore.reqTemperature(params);
 
@@ -220,7 +207,7 @@
   /*Steps*/
   const stepsData:Ref<number> = ref(0)
   async function acquireSteps():Promise<void>{
-    const params:StepsReq = getDataReq();
+    const params:StepsReq = getDataReq<StepsReq>();
     try {
       await healthStore.reqSteps(params);
       stepsData.value = healthStore.steps.Steps;
@@ -233,7 +220,7 @@
   const BloodPressureSystolicData = ref<number>(0); // 收缩压
   const BloodPressureDiastolicData = ref<number>(0); // 舒展压
   async function acquireBloodPressure():Promise<void>{
-    const params:BloodPressureReq = getDataReq();
+    const params:BloodPressureReq = getDataReq<BloodPressureReq>();
     try {
       await healthStore.reqBloodPressure(params);
       const length = healthStore.bloodPressures.length;
@@ -247,7 +234,7 @@
   /* Blood Oxygen */
   const BloodOxygenData = ref<number>(0)
   async function acquireBloodOxygen():Promise<void>{
-    const params:BloodOxygenReq = getDataReq();
+    const params:BloodOxygenReq = getDataReq<BloodOxygenReq>();
     try {
       await healthStore.reqBloodOxygen(params);
       const length = healthStore.bloodOxygens.length;

@@ -9,8 +9,9 @@ import {
   StepsReq, StepsResult,
   BloodPressureReq, BloodPressureResult,
   BloodOxygenReq,BloodOxygenResult,
+  TrackReq, TrackResult
 } from "@/api/types"
-
+// 
 export const sendCommand = async (params:CommandReq)=>{
   return await request<TokenResult>({
     url:"/command/sendcommand",
@@ -80,6 +81,17 @@ export const getBloodPressureByTime = async (params:BloodPressureReq):Promise<My
 export const getBloodOxygenByTime = async (params:BloodOxygenReq):Promise<MyResponse<BloodOxygenResult>> => {
   return await request<BloodOxygenResult>({
     url:"/bloodoxygen/get_bloodoxygen_bytime",
+    method:"POST",
+    data: params,
+    headers:{
+      'Content-Type' : "application/json"
+    }
+  })
+}
+
+export async function getTrack(params:TrackReq):Promise<MyResponse<TrackResult>>{
+  return await request<TrackResult>({
+    url:"/track/get_track_info",
     method:"POST",
     data: params,
     headers:{

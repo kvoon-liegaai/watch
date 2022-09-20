@@ -48,6 +48,9 @@
     })
     active.value = name;
   }
+  // onMounted(()=>{
+  //   import("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js").then(res => console.log(res))
+  // })
 </script>
 
 <style lang="scss">

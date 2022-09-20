@@ -71,3 +71,16 @@ export interface BloodOxygenResult extends Array<any> {
   "BloodOxygen": number;
   "BloodOxygenTime": string;
 }
+
+// track 定位
+export interface TrackReq extends DataReq{
+  MapType:"Baidu" | "Google";
+}
+export interface TrackResult extends Array<any>{
+  "GpsTime": string,
+  "Lat": number,
+  "Lng": number,
+  "PosType": string,
+  "Speed": number,
+  "Direction": number 
+}
