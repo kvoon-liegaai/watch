@@ -344,12 +344,17 @@
           if(cur_loc.Lng!=newest_loc.value.Lng || cur_loc.Lat!=newest_loc.value.Lat){
             console.log("位置变动")
             newest_loc.value = cur_loc;
-            // 地图已渲染,移除
-            if(theMap && theMap.loaded()){
+            // 地图已渲染
+            if(theMap){
               // 更新视图中心点
               theMap.setCenter([cur_loc.Lng, cur_loc.Lat])
               // 修改中心点marker
-              newest_marker.value.setLngLat([121, 31])
+              newest_marker.value.setLngLat([cur_loc.Lng, cur_loc.Lat])
+              // 修改轨迹
+              trackLayer.remove();
+              if(result.value) setTrackLayer(result.value);
+              // 重新绘制图层
+              theMap.triggerRepaint()
               console.log("更新了中心点")
             }
             else{
@@ -362,7 +367,7 @@
           }
         }
       } catch (error) {
-        Notify({type:"danger",message:"地图数据获取失败"}) 
+        Notify({type:"danger",message:`${error}`}) 
         console.log('地图更新失败:',error)
       }
     },5000)
