@@ -5,9 +5,9 @@
     </div>
   </van-overlay>
   
-  <van-button class="cmdBtn" type="primary" round size="small"  @touchend="trySendHealthCommand">开始检测</van-button>
+  <van-button class="cmdBtn" type="primary" round size="small" style="box-shadow: 0 0 10px rgba(0,0,0,.5);"  @touchend="trySendHealthCommand">开始检测</van-button>
 
-  <div id="ht">
+  <div id="hv">
     <!-- 心率 -->
     <div class="card card-heart">
       <van-row>
@@ -255,7 +255,7 @@
       console.error("update errror", error)
     }
   }
-  let timer:number;
+  let timer = ref<number>();
   onMounted(async ()=>{
     // emit change title
     const titleBus = useEventBus<Title>("titleBus")
@@ -265,13 +265,15 @@
     // update data when page is mounted
     await update();
     // Data is updated every half minute
-    timer = setInterval(async ()=>{
+    timer.value = setInterval(async ()=>{
       await update();
     }, 5*1000)
   })
   onUnmounted(()=>{
     // stop data update operation
-    clearInterval(timer)
+    console.log("timer",timer.value)
+    clearInterval(timer.value)
+    console.log("timer",timer.value)
   })
 </script>
 
@@ -292,7 +294,7 @@
     justify-content: center;
     height: 100%;
   }
-  #ht{
+  #hv{
     display:flex;
     flex-direction: column;
     &>*{

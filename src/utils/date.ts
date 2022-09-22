@@ -17,7 +17,7 @@ function formatDate(date:Date){
 
 export function getBEdate(){
   const date = new Date();
-  const Bdate:Date = new Date(date.getTime() -  5 * 24*60*60*1000) // 3 * 24 hours
+  const Bdate:Date = new Date(date.getTime() -  24*60*60*1000)
   const Edate:Date = new Date(date.getTime() + 60 * 1000);
   const BeginTime = formatDate(Bdate)
   const EndTime = formatDate(Edate)

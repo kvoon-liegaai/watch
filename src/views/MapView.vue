@@ -1,45 +1,49 @@
 <template>
   <van-overlay :show="isLoading_wrapper" style="z-index:9999">
     <div class="wrapper" @click.stop @touch.stop >
-      <van-loading type="circular" size="24px" text-color="white">检测中</van-loading>
+      <van-loading type="circular" size="24px" text-color="white">loading</van-loading>
     </div>
   </van-overlay>
 
-  <div ref="map" id="map" style="height:567px;"></div>
+  <div ref="map" id="map" style="height:100%"></div>
   <div ref="mark" id="mark"></div>
+  <!--  侧边按钮 -->
   <div class="side-btn-group">
-    <van-button type="primary" size="small" round @touchend="trySendLocationCommand" >请求定位</van-button>
+    <!-- <van-button type="primary" size="small" round @touchend="trySendLocationCommand" >请求定位</van-button> -->
+    <div @touchend="trySendLocationCommand">
+      <repositioning theme="multi-color" size="30" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>  
+    </div>
+    <div class="play-btn" v-if="isTrackLayerVisible">
+      <play v-show="!isTrackLayerPlaying" @touchend="switchTrackPlayStatus" class="play-btn" theme="multi-color" size="30" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
+      <pause-one v-show="isTrackLayerPlaying" @touchend="switchTrackPlayStatus" class="play-btn" theme="multi-color" size="30" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
+    </div>
+    <div v-if="isTrackLayerVisible" @touchend="switchMassMarkerLayer(result)">
+      <transfer v-show="!hasMassMark" theme="filled" size="30" fill="#333" :strokeWidth="2"/>
+      <transfer v-show="hasMassMark" theme="multi-color" size="30" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
+    </div>
+    <!-- 测试移动中心点 -->
+    <!-- <div>
+      <van-button type="primary"  @touchend="run1">update center</van-button>
+    </div> -->
   </div>
   <div class="sub-btn-group">
-    <Transition name="fade">
-      <div v-if="isTrackLayerVisible" @touchend="switchMassMarkerLayer(result)" style="width:32px;height:32px;background-color:white;border-radius:50%;border:2px solid black;">
-        <transfer v-show="!hasMassMark" theme="filled" size="28" fill="#333" :strokeWidth="2"/>
-        <transfer v-show="hasMassMark" theme="multi-color" size="28" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
-      </div><!--占位-->
-    </Transition>
-    <van-button class="history-btn" round size="small" type="primary" @touchend="switchTrack(result)">
+    <van-button class="history-btn" round plain hairline size="small" type="primary" @touchend="switchTrack(result)">
       <span v-show="!isTrackLayerVisible">查看历史轨迹</span>
       <span v-show="isTrackLayerVisible">关闭历史轨迹</span>
     </van-button>
-    <Transition name="fade">
-      <div class="play-btn" v-if="isTrackLayerVisible">
-        <play v-show="!isTrackLayerPlaying" @touchend="switchTrackPlayStatus" class="play-btn" theme="multi-color" size="36" :fill="['' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
-        <pause-one v-show="isTrackLayerPlaying" @touchend="switchTrackPlayStatus" class="play-btn" theme="multi-color" size="36" :fill="['' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
   // icon
-  import {Play,PauseOne,Transfer} from "@icon-park/vue-next"
+  import {Play,PauseOne,Transfer,Repositioning} from "@icon-park/vue-next"
   // vueuse
   import {useEventBus} from "@vueuse/core"
   // types
   import {Title} from "@/types/"
   import { CommandReq, MyResponse, TrackReq, TrackResult } from "@/api/types";
   // vue
-  import { ref, onMounted, Transition} from "vue";
+  import { ref, onMounted, Transition, nextTick, onUnmounted} from "vue";
   // pinia
   import { useAuthStore } from "@/stores/authStore";
   // api
@@ -53,8 +57,11 @@
   let map = ref(null);
   let mark = ref(null);
   let theMap:any = null;
+  // 
+  let newest_marker = ref<any>(null);
   //路径数据
   let result = ref<TrackResult>();
+  let newest_loc = ref<Location>({Lng:0,Lat:0});
   //路径层
   let trackLayer:any = null;
   let isTrackLayerVisible = ref<boolean>(false);
@@ -111,38 +118,42 @@
     window.aimap.accessToken = 'UFJGhyFdSzvm0ZbecYglp6CssgnDK7PZ';
     // 指定 baseApiUrl，用于指定服务地址，当处于私有化部署的环境中时，务必注意修改此项
     window.aimap.baseApiUrl = 'https://location-dev.newayz.com';
-    theMap = new window.aimap.Map({
-        container: map.value,
-        // 地图中心点
-        // center: [113.950442, 22.539902],//lng, lat
-        center: [Lng, Lat],//lng, lat
-        // 地图缩放级别
-        zoom: 13,
-        // 地图倾斜角度
-        pitch: 0,
-        // 地图旋转角度
-        bearing: 0,
-        // 地图样式 
-        style: 'aimap://styles/aimap/normal-v3',
-        // style: `aimap://styles/aimap/darkblue-v5`,
-        trackResize:true,//根据 dom 节点设置大小
-        logoPosition:'top-left'
-    });
-    const nav = new window.aimap.NavigationControl({
-      showCompass: false,
-    });
-    // 增加地图缩放按钮
-    theMap.addControl(nav);
-    // 增加地图罗盘
-    // theMap.addControl(new window.aimap.CompassControl());
-    // 添加图标
-    // theMap.addImage("company-yellow","./img/local.svg", {type:"svg"})
-    theMap.on("load",()=>{
-      // 默认Marker
-      const newest_marker = new window.aimap.Marker({color:"tomato"})
-          .setLngLat([Lng, Lat])
-          .addTo(theMap);
-      isLoading_wrapper.value = false;
+    nextTick(()=>{
+      theMap = new window.aimap.Map({
+          container: map.value,
+          // 地图中心点
+          // center: [113.950442, 22.539902],//lng, lat
+          center: [Lng, Lat],//lng, lat
+          // 地图缩放级别
+          zoom: 13,
+          // 地图倾斜角度
+          pitch: 0,
+          // 地图旋转角度
+          bearing: 0,
+          // 地图样式 
+          style: 'aimap://styles/aimap/normal-v3',
+          // style: `aimap://styles/aimap/darkblue-v5`,
+          trackResize:true,//根据 dom 节点设置大小
+          logoPosition:'top-left',
+          dragRotate:true
+      });
+      const nav = new window.aimap.NavigationControl({
+        showCompass: false,
+      });
+      // 增加地图缩放按钮
+      theMap.addControl(nav);
+      // 增加地图罗盘
+      theMap.addControl(nav, "top-right")
+      // theMap.addControl(new window.aimap.CompassControl(),"top-right");
+      // 添加图标
+      // theMap.addImage("company-yellow","./img/local.svg", {type:"svg"})
+      theMap.on("load",()=>{
+        // 默认Marker
+        newest_marker.value = new window.aimap.Marker({color:"tomato"})
+            .setLngLat([Lng, Lat])
+            .addTo(theMap);
+        isLoading_wrapper.value = false;
+      })
     })
   }
   // Result ----> coordinates: number[][]
@@ -150,7 +161,7 @@
     console.log(result)
     console.log("trackResultToCoordinates")
     let arr:number[][] = []
-    result.forEach(item => 
+    result.forEach(item =>
       arr.push([item["Lng"], item["Lat"]])
     )
     return arr;
@@ -200,6 +211,7 @@
       minZoom: 3,
       maxZoom: 20,
     })
+    //@ts-ignore
     trackLayer.on((e)=>{
       console.log('e',e)
     })
@@ -303,32 +315,74 @@
       hasMassMark.value = true;
     }
   }
+  let timer = ref<number>()
+  onUnmounted(()=>{
+    clearInterval(timer.value)
+  })
   onMounted(async ()=>{
     const titleBus = useEventBus<Title>("titleBus")
-    let newest_loc:any;
     titleBus.emit("地图")
     // 显示加载遮罩
     isLoading_wrapper.value = true;
-    // 获取地图数据
-    try {
-      newest_loc = await reqTrack();
-    } catch (error) {
-      Notify({type:"danger",message:"地图数据获取失败"}) 
-      console.log('error 地图数据获取失败',error)
-    }
     // 加载aimap
-    try {
-      await LoadJs("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js")
-    } catch (error) {
-     Notify({type:"danger",message:"加载地图组件失败"}) 
-     console.log('error 加载地图组件失败',error)
+    if(!window.aimap){
+      try {
+        await LoadJs("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js")
+      } catch (error) {
+      Notify({type:"danger",message:"加载地图组件失败"}) 
+        console.log('error 加载地图组件失败',error)
+      }
     }
-    //初始化地图
-    initMap(newest_loc.Lng, newest_loc.Lat);
+    // 获取地图数据
+    timer.value = setInterval(async ()=>{
+      try {
+        const cur_loc = await reqTrack();
+        //@ts-ignore
+        console.log("最新地理位置", cur_loc.Lng, cur_loc.Lat);
+        console.log("当前地理位置", newest_loc.value.Lng, newest_loc.value.Lat)
+        if(cur_loc != undefined){ // 当前定位存在且与视图最新定位不一致
+          if(cur_loc.Lng!=newest_loc.value.Lng || cur_loc.Lat!=newest_loc.value.Lat){
+            console.log("位置变动")
+            newest_loc.value = cur_loc;
+            // 地图已渲染,移除
+            if(theMap && theMap.loaded()){
+              // 更新视图中心点
+              theMap.setCenter([cur_loc.Lng, cur_loc.Lat])
+              // 修改中心点marker
+              newest_marker.value.setLngLat([121, 31])
+              console.log("更新了中心点")
+            }
+            else{
+              initMap(newest_loc.value.Lng, newest_loc.value.Lat);
+              console.log("初始化地图")
+            }
+          }
+          else{
+            console.log("位置无变动");
+          }
+        }
+      } catch (error) {
+        Notify({type:"danger",message:"地图数据获取失败"}) 
+        console.log('地图更新失败:',error)
+      }
+    },5000)
+    // //初始化地图
+    // initMap(newest_loc.value.Lng, newest_loc.value.Lat);
   })
+  // 测试移动中心点用
+  // function run1(){
+  //   if(theMap && theMap.loaded()){
+  //     theMap.setCenter([121, 31])
+  //     newest_marker.value.setLngLat([121, 31])
+  //     console.log("更新了中心点")
+  //   }
+  // }
 </script>
 
 <style lang="scss" scoped>
+  /*#mao{
+    height:100% !important;
+  }*/
   .btn{
     position: fixed;
     left: 0;
@@ -337,11 +391,19 @@
   }
   .side-btn-group{
     @extend .btn;
+    &>*{
+      // 分隔符
+      border-bottom:1px solid #ddd;
+    }
+    display: flex;
+    flex-direction: column;
     display: inline-block;
-    width:50px;
+    width:34px;
     top:80px;
     left:-300px;
-    //background-color: #bfc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,.5);
+    background-color: white;
   }
   .sub-btn-group{
     @extend .btn;
@@ -354,6 +416,7 @@
     .history-btn{
       width:120px;
       margin:0 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,.5);
     }
   }
   .fade-enter-active,

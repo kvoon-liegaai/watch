@@ -52,7 +52,6 @@
   //   import("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js").then(res => console.log(res))
   // })
 </script>
-
 <style lang="scss">
 #app {
   font-family: "阿里妈妈数黑体 Bold", Avenir, Helvetica, Arial, sans-serif;
@@ -61,14 +60,18 @@
   text-align: center;
   color: #2c3e50;
   width:375px;
-  height:667px;
+  height:100vh;
+  //height:667px;
   background-color:$theme-bg;
+  display:flex;
+  flex-direction: column;
   .content{
     //navbar == tabbar == 80px
     //height:1154px;
+    flex-grow: 1;
     background-color: $theme-bg;
   }
-
+  
   :deep(.van-nav-bar__title.van-ellipsis){
     line-height: 1.5;
     font-size:600px;
