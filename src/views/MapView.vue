@@ -118,42 +118,40 @@
     window.aimap.accessToken = 'UFJGhyFdSzvm0ZbecYglp6CssgnDK7PZ';
     // 指定 baseApiUrl，用于指定服务地址，当处于私有化部署的环境中时，务必注意修改此项
     window.aimap.baseApiUrl = 'https://location-dev.newayz.com';
-    nextTick(()=>{
-      theMap = new window.aimap.Map({
-          container: map.value,
-          // 地图中心点
-          // center: [113.950442, 22.539902],//lng, lat
-          center: [Lng, Lat],//lng, lat
-          // 地图缩放级别
-          zoom: 13,
-          // 地图倾斜角度
-          pitch: 0,
-          // 地图旋转角度
-          bearing: 0,
-          // 地图样式 
-          style: 'aimap://styles/aimap/normal-v3',
-          // style: `aimap://styles/aimap/darkblue-v5`,
-          trackResize:true,//根据 dom 节点设置大小
-          logoPosition:'top-left',
-          dragRotate:true
-      });
-      const nav = new window.aimap.NavigationControl({
-        showCompass: false,
-      });
-      // 增加地图缩放按钮
-      theMap.addControl(nav);
-      // 增加地图罗盘
-      theMap.addControl(nav, "top-right")
-      // theMap.addControl(new window.aimap.CompassControl(),"top-right");
-      // 添加图标
-      // theMap.addImage("company-yellow","./img/local.svg", {type:"svg"})
-      theMap.on("load",()=>{
-        // 默认Marker
-        newest_marker.value = new window.aimap.Marker({color:"tomato"})
-            .setLngLat([Lng, Lat])
-            .addTo(theMap);
-        isLoading_wrapper.value = false;
-      })
+    theMap = new window.aimap.Map({
+      container: map.value,
+      // 地图中心点
+      // center: [113.950442, 22.539902],//lng, lat
+      center: [Lng, Lat],//lng, lat
+      // 地图缩放级别
+      zoom: 13,
+      // 地图倾斜角度
+      pitch: 0,
+      // 地图旋转角度
+      bearing: 0,
+      // 地图样式
+      style: 'aimap://styles/aimap/normal-v3',
+      // style: `aimap://styles/aimap/darkblue-v5`,
+      trackResize:true,//根据 dom 节点设置大小
+      logoPosition:'top-left',
+      dragRotate:true
+    });
+    const nav = new window.aimap.NavigationControl({
+      showCompass: false,
+    });
+    // 增加地图缩放按钮
+    theMap.addControl(nav);
+    // 增加地图罗盘
+    theMap.addControl(nav, "top-right")
+    // theMap.addControl(new window.aimap.CompassControl(),"top-right");
+    // 添加图标
+    // theMap.addImage("company-yellow","./img/local.svg", {type:"svg"})
+    theMap.on("load",()=>{
+      // 默认Marker
+      newest_marker.value = new window.aimap.Marker({color:"tomato"})
+          .setLngLat([Lng, Lat])
+          .addTo(theMap);
+      isLoading_wrapper.value = false;
     })
   }
   // Result ----> coordinates: number[][]
@@ -270,17 +268,19 @@
     Lng:number;
     Lat:number
   }
+
   async function reqTrack():Promise<Location|undefined>{
     try {
         const params:TrackReq = genReqParams<TrackReq>("Baidu");
         const res:MyResponse<TrackResult> = await getTrack(params)
         result.value = res.Result;
-        const newest_loc:Location = result.value[result.value.length - 1];
+        const newest_loc:Location = res.Result.length ? result.value[result.value.length - 1] : undefined;
         return newest_loc;
       } catch (error) {
-      console.log('map data init error',error)
-    }
+        console.log('map data init error',error)
+      }
   }
+
   // 设置撒点图层
   function setMassMarkerLayer(result:TrackResult){
     const coordinates = trackResultToCoordinates(result);
@@ -293,6 +293,7 @@
       data,
     })
   }
+
   // 轨迹撒点/撤销撒点
   function switchMassMarkerLayer(result:TrackResult|undefined){
     if(!massMarkLayer){
@@ -333,6 +334,15 @@
         console.log('error 加载地图组件失败',error)
       }
     }
+
+    let cur_loc = await reqTrack();
+    if (!cur_loc) {
+      cur_loc = {} as Location;
+      cur_loc.Lng = 12684494.69;
+      cur_loc.Lat = 2559051.81;
+    }
+    initMap(cur_loc.Lng, cur_loc.Lat);
+
     // 获取地图数据
     timer.value = setInterval(async ()=>{
       try {
@@ -351,15 +361,14 @@
               // 修改中心点marker
               newest_marker.value.setLngLat([cur_loc.Lng, cur_loc.Lat])
               // 修改轨迹
-              trackLayer.remove();
+              if (trackLayer) {
+                trackLayer.remove();
+              }
+
               if(result.value) setTrackLayer(result.value);
               // 重新绘制图层
               theMap.triggerRepaint()
               console.log("更新了中心点")
-            }
-            else{
-              initMap(newest_loc.value.Lng, newest_loc.value.Lat);
-              console.log("初始化地图")
             }
           }
           else{
