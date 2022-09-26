@@ -134,8 +134,10 @@
       // style: `aimap://styles/aimap/darkblue-v5`,
       trackResize:true,//根据 dom 节点设置大小
       logoPosition:'top-left',
-      dragRotate:true
+      dragRotate:true,
+
     });
+
     const nav = new window.aimap.NavigationControl({
       showCompass: false,
     });
@@ -173,6 +175,7 @@
       data: {
           coordinates
       },
+      spatialReference: "bd09",
       style: {
           "line-color": "rgba(0,153,128,.8)",
           "line-width": 3,
@@ -203,7 +206,7 @@
       },
       animation: {
           repeat: true,
-          duration: 8,
+          duration: 10,
           autoplay: false
       },
       minZoom: 3,
@@ -269,12 +272,25 @@
     Lat:number
   }
 
+  function bd09togcj02(bd_lng: number, bd_lat: number): number[] {
+    // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
+    const x_PI = 3.14159265358979324 * 3000.0 / 180.0;
+    let x = bd_lng - 0.0065;
+    let y = bd_lat - 0.006;
+    let z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_PI);
+    let theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_PI);
+    let gg_lng = z * Math.cos(theta);
+    let gg_lat = z * Math.sin(theta);
+    return [gg_lng, gg_lat]
+  }
+
   async function reqTrack():Promise<Location|undefined>{
     try {
         const params:TrackReq = genReqParams<TrackReq>("Baidu");
         const res:MyResponse<TrackResult> = await getTrack(params)
         result.value = res.Result;
         const newest_loc:Location = res.Result.length ? result.value[result.value.length - 1] : undefined;
+        [newest_loc.Lng, newest_loc.Lat] = bd09togcj02(newest_loc.Lng, newest_loc.Lat)
         return newest_loc;
       } catch (error) {
         console.log('map data init error',error)
@@ -288,9 +304,11 @@
     coordinates.forEach(item=>{
       data.push({type:"Point",coordinates:item});
     })
+
     massMarkLayer = new window.aimap.MassMarkerLayer({
       map:theMap,
       data,
+      spatialReference: 'bd09'
     })
   }
 
@@ -340,7 +358,10 @@
       cur_loc = {} as Location;
       cur_loc.Lng = 12684494.69;
       cur_loc.Lat = 2559051.81;
+      [cur_loc.Lng, cur_loc.Lat] = bd09togcj02(cur_loc.Lng, cur_loc.Lat);
     }
+
+
     initMap(cur_loc.Lng, cur_loc.Lat);
 
     // 获取地图数据
@@ -350,6 +371,7 @@
         //@ts-ignore
         console.log("最新地理位置", cur_loc.Lng, cur_loc.Lat);
         console.log("当前地理位置", newest_loc.value.Lng, newest_loc.value.Lat)
+
         if(cur_loc != undefined){ // 当前定位存在且与视图最新定位不一致
           if(cur_loc.Lng!=newest_loc.value.Lng || cur_loc.Lat!=newest_loc.value.Lat){
             console.log("位置变动")
@@ -365,7 +387,7 @@
                 trackLayer.remove();
               }
 
-              if(result.value) setTrackLayer(result.value);
+              if(result.value && isTrackLayerVisible.value) setTrackLayer(result.value);
               // 重新绘制图层
               theMap.triggerRepaint()
               console.log("更新了中心点")
