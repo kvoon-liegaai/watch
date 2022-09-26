@@ -6,6 +6,7 @@
   <van-tabbar placeholder class="tabbar" v-model="active" v-if="showTabbar">
     <van-tabbar-item @touchend="switchPage('health')" icon="like" name="health">健康</van-tabbar-item>
     <van-tabbar-item @touchend="switchPage('map')" icon="map-marked" name="map">地图</van-tabbar-item>
+    <van-tabbar-item @touchend="switchPage('set')" icon="setting" name="setting">设置</van-tabbar-item>
   </van-tabbar>
 </template>
 
@@ -57,7 +58,7 @@
   font-family: "阿里妈妈数黑体 Bold", Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  //text-align: center;
   color: #2c3e50;
   width:375px;
   height:100vh;

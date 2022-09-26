@@ -289,12 +289,15 @@
   }
   // 遮罩层
    .wrapper {
+    text-align: center;
+    vertical-align: middle;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
   }
   #hv{
+    text-align:center;
     display:flex;
     flex-direction: column;
     &>*{

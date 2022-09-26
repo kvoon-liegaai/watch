@@ -1,8 +1,17 @@
+export type CommandCodeType = 
+  "9012" | // 健康请求
+  "0039" | // 定位请求
+  "0305" | // GPS上传间隔
+  "2815" | // 心率上传间隔
+  "9113" | // 体温上传间隔
+  "0079" // 计步器开关
+
 export interface CommandReq{
   AccessToken:string;
   Imei:string;
   Time:string;
-  CommandCode:"9012" | "0039", // 9012 健康请求 0039 定位请求
+  CommandCode:CommandCodeType;
+  CommandValue?:string;
   ReqId:string;
 }
 

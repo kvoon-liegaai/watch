@@ -12,8 +12,8 @@ import {
   TrackReq, TrackResult
 } from "@/api/types"
 // 
-export const sendCommand = async (params:CommandReq)=>{
-  return await request<TokenResult>({
+export const sendCommand = async (params:CommandReq):Promise<MyResponse<any>>=>{
+  return await request<any>({
     url:"/command/sendcommand",
     method:"POST",
     data:params,

@@ -1,15 +1,13 @@
 <template>
-  <van-overlay :show="isLoading_wrapper" style="z-index:9999">
+  <van-overlay :show="isLoading_wrapper" style="z-index:9999;text-align:center;vertical-align:middle;">
     <div class="wrapper" @click.stop @touch.stop >
       <van-loading type="circular" size="24px" text-color="white">loading</van-loading>
     </div>
   </van-overlay>
-
   <div ref="map" id="map" style="height:100%"></div>
   <div ref="mark" id="mark"></div>
   <!--  侧边按钮 -->
   <div class="side-btn-group">
-    <!-- <van-button type="primary" size="small" round @touchend="trySendLocationCommand" >请求定位</van-button> -->
     <div @touchend="trySendLocationCommand">
       <repositioning theme="multi-color" size="30" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>  
     </div>
@@ -21,10 +19,6 @@
       <transfer v-show="!hasMassMark" theme="filled" size="30" fill="#333" :strokeWidth="2"/>
       <transfer v-show="hasMassMark" theme="multi-color" size="30" :fill="['#333' ,'#2F88FF' ,'#FFF' ,'#43CCF8']" :strokeWidth="2"/>
     </div>
-    <!-- 测试移动中心点 -->
-    <!-- <div>
-      <van-button type="primary"  @touchend="run1">update center</van-button>
-    </div> -->
   </div>
   <div class="sub-btn-group">
     <van-button class="history-btn" round plain hairline size="small" type="primary" @touchend="switchTrack(result)">
@@ -43,7 +37,7 @@
   import {Title} from "@/types/"
   import { CommandReq, MyResponse, TrackReq, TrackResult } from "@/api/types";
   // vue
-  import { ref, onMounted, Transition, nextTick, onUnmounted} from "vue";
+  import { ref, onMounted, onUnmounted} from "vue";
   // pinia
   import { useAuthStore } from "@/stores/authStore";
   // api
@@ -51,6 +45,8 @@
   import { genReqParams } from "@/utils/genReqParams";
   import { Notify } from "vant";
   import { getAccessToken, getUserId } from "@/utils/auth";
+  // utils
+  import throttle from "@/utils/throttle";
   // isloading
   let isLoading_wrapper = ref<boolean>(false);
   //dom
@@ -74,28 +70,39 @@
 
   /* 主动发起检测请求 */
   const authStore = useAuthStore();
-  async function trySendLocationCommand():Promise<void>{
-    // prepare params for sendcommand
-    const params:CommandReq = {
-      AccessToken:getAccessToken(),
-      Imei:authStore.Imei,
-      Time:String(Date.now()),
-      CommandCode:"0039", // 9012 健康请求 0039 定位请求
-      ReqId:getUserId()
-    }
-    // try send health command
-    try {
-      // loading status
+  const trySendLocationCommand = throttle(
+    async ():Promise<void>=>{
+      // prepare params for sendcommand
+      const params:CommandReq = {
+        AccessToken:getAccessToken(),
+        Imei:authStore.Imei,
+        Time:String(Date.now()),
+        CommandCode:"0039", // 9012 健康请求 0039 定位请求
+        ReqId:getUserId()
+      }
+      // try send health command
+      try {
+        // loading status
+        isLoading_wrapper.value = true;
+        const res = await sendCommand(params);
+        console.log("location commmand res",res)
+        Notify({type:"success",message:"请求成功"})
+      } catch (error) {
+        Notify({type:"danger",message:`请求定位:${error}`});
+      } finally{
+        isLoading_wrapper.value = false;
+      }
+    },
+    ()=>{
       isLoading_wrapper.value = true;
-      const res = await sendCommand(params);
-      console.log("location commmand res",res)
-      Notify({type:"success",message:"请求成功"})
-    } catch (error) {
-      Notify({type:"danger",message:`请求定位:${error}`});
-    } finally{
-      isLoading_wrapper.value = false;
-    }
-  }
+      setTimeout(()=>{
+        Notify({type:"success",message:"请求成功"})
+        isLoading_wrapper.value = false;
+      },400)
+    }, 
+    5*60*1000,
+  )
+
   // 加载 script 标签 引入aimap
   function LoadJs(src:string){
     return new Promise((resolve,reject)=>{
@@ -112,6 +119,7 @@
       }
     })
   }
+
   // 初始化地图
   function initMap(Lng:number, Lat:number){
     // 指定 accessToken，用于服务鉴权
@@ -154,6 +162,7 @@
       isLoading_wrapper.value = false;
     })
   }
+
   // Result ----> coordinates: number[][]
   function trackResultToCoordinates(result:TrackResult):number[][]{
     console.log(result)
@@ -214,6 +223,7 @@
       console.log('e',e)
     })
   }
+
   // 切换轨迹显示/隐藏
   function switchTrack(result:TrackResult|undefined){
     if(!trackLayer){
@@ -244,6 +254,7 @@
       isTrackLayerVisible.value = true;
     }
   }
+  
   // 切换轨迹播放/暂停
   function switchTrackPlayStatus(){
     if(isTrackLayerPlaying.value){
@@ -257,6 +268,7 @@
       console.log('isTrackLayerPlaying',isTrackLayerPlaying)
     }
   }
+
   /**
    * @remarks 
    * 
@@ -316,10 +328,13 @@
       hasMassMark.value = true;
     }
   }
+
   let timer = ref<number>()
+
   onUnmounted(()=>{
     clearInterval(timer.value)
   })
+  
   onMounted(async ()=>{
     const titleBus = useEventBus<Title>("titleBus")
     titleBus.emit("地图")
@@ -367,7 +382,7 @@
 
               if(result.value) setTrackLayer(result.value);
               // 重新绘制图层
-              theMap.triggerRepaint()
+              theMap.triggerRepaint();
               console.log("更新了中心点")
             }
           }
@@ -379,18 +394,10 @@
         Notify({type:"danger",message:`${error}`}) 
         console.log('地图更新失败:',error)
       }
-    },5000)
+    },10000)
     // //初始化地图
     // initMap(newest_loc.value.Lng, newest_loc.value.Lat);
   })
-  // 测试移动中心点用
-  // function run1(){
-  //   if(theMap && theMap.loaded()){
-  //     theMap.setCenter([121, 31])
-  //     newest_marker.value.setLngLat([121, 31])
-  //     console.log("更新了中心点")
-  //   }
-  // }
 </script>
 
 <style lang="scss" scoped>
@@ -405,6 +412,7 @@
   }
   .side-btn-group{
     @extend .btn;
+    text-align:center;
     &>*{
       // 分隔符
       border-bottom:1px solid #ddd;

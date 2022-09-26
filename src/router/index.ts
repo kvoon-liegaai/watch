@@ -3,6 +3,7 @@ import HealthView from '../views/HealthView.vue'
 import MapView from "@/views/MapView.vue"
 import MdFiveView from "@/views/mdFiveView.vue"
 import BannedView from "@/views/BannedView.vue"
+import SetView from "@/views/setView/SetView.vue"
 
 import {useAuthStore} from "@/stores/authStore"
 
@@ -31,10 +32,15 @@ const routes: Array<RouteRecordRaw> = [
     component: MapView
   },
   {
-    path: '/mdFiveview',
-    name: 'mdFiveview',
-    component: MdFiveView
+    path:"/set",
+    name:"set",
+    component:SetView
   }
+  // {
+  //   path: '/mdFiveview',
+  //   name: 'mdFiveview',
+  //   component: MdFiveView
+  // }
 ]
 
 const router = createRouter({

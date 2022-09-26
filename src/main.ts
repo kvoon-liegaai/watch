@@ -8,7 +8,6 @@ import 'vant/lib/index.css';
 import "@icon-park/vue-next/styles/index.css"
 import "@/assets/font/index.css"
 
-
 import {createPinia} from "pinia"
 
 import {
@@ -22,7 +21,12 @@ import {
   Notify,
   Skeleton,
   Overlay,
-  Loading
+  Loading,
+  Cell,
+  CellGroup,
+  Switch,
+  Field,
+  NumberKeyboard
 } from "vant"
 
 createApp(App)
@@ -41,4 +45,9 @@ createApp(App)
   .use(Skeleton)
   .use(Overlay)
   .use(Loading)
+  .use(Cell)
+  .use(CellGroup)
+  .use(Switch)
+  .use(Field)
+  .use(NumberKeyboard)
   .mount('#app')
