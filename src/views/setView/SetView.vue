@@ -1,8 +1,8 @@
 <template>
   <!--遮罩-->
-  <van-overlay :show="isSetting">
+  <van-overlay :show="isSetting" style="z-index:9999;text-align:center;vertical-align:middle !important;">
     <div class="wrapper" @click.stop @touch.stop>
-      <van-loading type="circular" size="24px" text-color="white">设置中...</van-loading>
+      <van-loading type="circular" size="24px" text-color="white" >设置中...</van-loading>
     </div>
   </van-overlay>
 
@@ -19,7 +19,9 @@
       </template>
     </van-cell>
     <!-- GPS上传时间间隔 -->
-    <van-field label="GPS定位间隔" input-align="right" v-model="GPSTimeInterval" readonly clickable
+    <van-field 
+      :rules="[{validator:validators.GPS}]"
+      placeholder="10" label="GPS定位间隔" input-align="right" v-model="GPSTimeInterval" readonly clickable
       @touchstart.stop="showKB(keyboardStatus, 'isGPSKBshow')"
       ref="GPSFieldRef">
       <template #right-icon>
@@ -30,11 +32,13 @@
       v-model="GPSTimeInterval"
       :show="keyboardStatus.isGPSKBshow"
       :maxlength="6"
-      @blur="onInputFinished('0305',GPSTimeInterval);keyboardStatus.isGPSKBshow = false"
+      @blur="onInputFinished('0305',GPSTimeInterval, validators.GPS);keyboardStatus.isGPSKBshow = false"
       close-button-text="完成"
     />
     <!-- 体温上传时间间隔 -->
-    <van-field label="体温测量间隔" input-align="right" v-model="temperatureTimeInterval" readonly clickable @touchstart.stop="showKB(keyboardStatus, 'isTemperatureKBshow')">
+    <van-field
+      :rules="[{validator:validators.temperature}]"
+      placeholder="10" label="体温测量间隔" input-align="right" v-model="temperatureTimeInterval" readonly clickable @touchstart.stop="showKB(keyboardStatus, 'isTemperatureKBshow')">
       <template #right-icon>
         <span>小时</span>
       </template>
@@ -43,11 +47,13 @@
       v-model="temperatureTimeInterval"
       :show="keyboardStatus.isTemperatureKBshow"
       :maxlength="6"
-      @blur="onInputFinished('9113',GPSTimeInterval);keyboardStatus.isTemperatureKBshow = false"
+      @blur="onInputFinished('9113',GPSTimeInterval,validators.temperature);keyboardStatus.isTemperatureKBshow = false"
       close-button-text="完成"
     />
     <!-- 心率上传时间间隔 -->
-    <van-field label="心率测量间隔" input-align="right" v-model="heartRateTimeInterval" readonly clickable @touchstart.stop="showKB(keyboardStatus,'isHeartRateKBshow')">
+    <van-field
+    :rules="[{validator:validators.heartRate}]"
+    placeholder="500" label="心率测量间隔" input-align="right" v-model="heartRateTimeInterval" readonly clickable @touchstart.stop="showKB(keyboardStatus,'isHeartRateKBshow')">
       <template #right-icon>
         <span>秒</span>
       </template>
@@ -56,15 +62,31 @@
       v-model="heartRateTimeInterval"
       :show="keyboardStatus.isHeartRateKBshow"
       :maxlength="6"
-      @blur="onInputFinished('2815',GPSTimeInterval);keyboardStatus.isHeartRateKBshow = false"
+      @blur="onInputFinished('2815',GPSTimeInterval,validators.heartRate);keyboardStatus.isHeartRateKBshow = false"
       close-button-text="完成"
     />
   </van-cell-group>
 
-  <van-cell-group title="紧急联系人">
-    <van-cell title="单元格" value="内容"></van-cell>
-    <van-cell title="单元格" value="内容" label="描述信息"></van-cell>
-  </van-cell-group>
+  <van-form @submit="setLinkmans" @failed="onFailed">
+    <van-cell-group title="紧急联系人" style="background-color:transparent">
+      <van-field
+      v-for="(linkman, index) in linkmans"
+      :key="index"
+      v-model="linkmans[index]"
+      center
+      clearable
+      :label="'联系人'+(index+1)+'(+86)'"
+      placeholder="请输入电话号码"
+      :rules="[{validator:validators.linkman}]"
+      >
+      </van-field>
+      <div style="margin:16px;">
+        <van-button round block size="small" type="primary" native-type="submit">
+          提交
+        </van-button>
+      </div>
+    </van-cell-group>
+  </van-form> 
   
 </template>
 
@@ -76,10 +98,13 @@
   import {showKB} from "@/utils/keyBoardGroupVis"
   import {genCommandParams} from "@/utils/genReqParams"
   // types
-  import {CommandCodeType} from "@/api/types"
+  import {CommandCodeType, CommandReq, MyResponse} from "@/api/types"
   import { Notify } from "vant";
   import type { FieldInstance } from 'vant';
+  // FP
   import * as R from "ramda"
+  import {log} from "@/utils/FP"
+  
   let isSetting = ref<boolean>(false);
   // 数字键盘状态
   const keyboardStatus = reactive({
@@ -88,53 +113,69 @@
     isHeartRateKBshow:false,
   })
   // 计步器开关
-  const isPedometerChecked = ref<boolean>(false);
+  const isPedometerChecked = ref<boolean>(true);
+  function updateCheck(newCheckVal:boolean){
+    isPedometerChecked.value = newCheckVal;
+  }
   // GPS
-  const GPSTimeInterval = ref<string>("10");// minute 
+  const GPSTimeInterval = ref<string>("");// minute 
   const GPSFieldRef = ref<FieldInstance>()
   // 体温
-  const temperatureTimeInterval = ref<string>("10"); // hours
+  const temperatureTimeInterval = ref<string>(""); // hours
   // 心率
-  const heartRateTimeInterval = ref<string>("500"); // second
-  // async function trySendHealthCommand
-  // const onPedometerCheckSwitch = compose(
+  const heartRateTimeInterval = ref<string>(""); // second
+  // 联系人
+  const linkmans = reactive(["","",""])
+  // 校验函数
+  const validators = {
+    GPS:(val:string):boolean|string => val ? true : "间隔时间不能为空",
+    temperature:(val:string):boolean|string => val ? true : "间隔时间不能为空",
+    heartRate:(val:string):boolean|string => Number(val) >= 300 && Number(val) <= 65535 ? true : "请确保时间在300-65535秒内",
+    linkman:(val:string):boolean|string=> /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(val) ? true : "手机号格式有误"
+  }
+  // 错误消息
+  function onFailed(errInfo:{values:Array<any>,errors:Array<{name:string, message:string}>}){
+    Notify({type:"warning",message:errInfo.errors[0].message})
+  }
+  
 
-  // );
-
-  //TODO: curry
   /**
    * @remarks 
    * function: part of curried genCommandParams
-  */
+   * @params commandValue - 请求命令值
+   * */
   const genPedometerCommandParams = genCommandParams("0079");
-  function run(){
-    const res = genPedometerCommandParams("true")
-    console.log('run res', res)
-  }
-  // 切换计步开
-  async function onPedometerCheckSwitch(newVal:boolean){
-    const code = "0079";
-    const params = genCommandParams(code,String(newVal))
-    console.log('(setting):command params',params)
+  const runPedometerCheckSwitch = R.pipe<boolean[], string, CommandReq, Promise<MyResponse<any>>>(
+    String,
+    genPedometerCommandParams,
+    sendCommand
+  )
+  /* 切换计步器开关 */
+  async function onPedometerCheckSwitch(targetVal:boolean){
     try {
       // switch start
       isSetting.value = true;
-      const res = await sendCommand(params);
-      console.log('(setting) res',res)
-      Notify({type:"success",message:"设置成功"})
-      // switch success
-      isPedometerChecked.value = newVal;
+      await runPedometerCheckSwitch(targetVal);
+      updateCheck(targetVal)
+      Notify({type:"success",message:'设置成功'})
+      
     } catch (error) {
-      Notify({type:"danger",message:`${error}`})
+      Notify({type:"danger",message:`设置失败:${error}`})
     }
     finally{
       // switch end
       isSetting.value = false;
     }
   }
-  // }
+
+
   // 输入结束
-  async function onInputFinished(code:CommandCodeType, inputVal:string){
+  async function onInputFinished(code:CommandCodeType, inputVal:string, validator:(val:string)=>boolean|string){
+    const checkResult = validator(inputVal)
+    if(typeof checkResult === "string"){
+      onFailed({values:[inputVal],errors:[{name:code, message:checkResult}]})
+      return
+    }
     const params = genCommandParams(code,inputVal)
     console.log('(setting):command params',params)
     try {
@@ -151,14 +192,44 @@
       isSetting.value = false;
     }
   }
- 
-</script>
+
+  /* 设置紧急联系人 */
+  const genLinkMansParams = genCommandParams("0001");
+  function convertArrayToString(arr:string[]){
+    let str = "";
+    for(let i = 0; i < arr.length-1; i++){
+      str += arr[i] + ","
+    }
+    str += arr[arr.length-1];
+    return str;
+  }
+  const runSetLinkmans = R.pipe<any[], string, CommandReq, CommandReq, Promise<MyResponse<any>>>(
+    convertArrayToString,
+    genLinkMansParams,
+    log('设置紧急联系人请求参数:'),
+    sendCommand
+  )
+  async function setLinkmans(linkmans:string[]){
+    try {
+      // switch start
+      isSetting.value = true;
+      await runSetLinkmans(linkmans);
+      Notify({type:"success",message:'设置成功'})
+    } catch (error) {
+      Notify({type:"danger",message:`设置失败:${error}`});
+    }
+    finally{
+      // switch end
+      isSetting.value = false;
+    }
+  }
+ </script>
 
 <style lang="scss" scoped>
   .cell-title{
     text-align: left;
   }
-  :deep(.van-cell-group__title){
-    color:red;
-  }
+  /*:deep(.van-cell-group__title){
+    color:--van-gray-8;
+  }*/
 </style>

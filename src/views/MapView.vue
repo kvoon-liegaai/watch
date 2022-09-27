@@ -272,13 +272,6 @@
     }
   }
 
-  /**
-   * @remarks 
-   * 
-   * 设置 result 坐标信息数组,并返回一个最新的坐标点 Location 可用于初始化地图
-   * 
-   * @returns newet_loc - 最新轨迹坐标
-   */
   interface Location{
     Lng:number;
     Lat:number
@@ -295,18 +288,25 @@
     let gg_lat = z * Math.sin(theta);
     return [gg_lng, gg_lat]
   }
-
-  async function reqTrack():Promise<Location|undefined>{
+  
+  /**
+   * @remarks 
+   * 
+   * 设置 result 坐标信息数组,并返回一个最新的坐标点 Location 可用于初始化地图
+   * 
+   * @returns newet_loc - 最新轨迹坐标
+   */
+  async function reqTrack():Promise<Location | undefined>{
     try {
-        const params:TrackReq = genReqParams<TrackReq>("Baidu");
-        const res:MyResponse<TrackResult> = await getTrack(params)
-        result.value = res.Result;
-        const newest_loc:Location = res.Result.length ? result.value[result.value.length - 1] : undefined;
-        [newest_loc.Lng, newest_loc.Lat] = bd09togcj02(newest_loc.Lng, newest_loc.Lat)
-        return newest_loc;
-      } catch (error) {
-        console.log('map data init error',error)
-      }
+      const params:TrackReq = genReqParams<TrackReq>("Baidu");
+      const res:MyResponse<TrackResult> = await getTrack(params)
+      result.value = res.Result;
+      const newest_loc:Location = res.Result.length ? result.value[result.value.length - 1] : undefined;
+      [newest_loc.Lng, newest_loc.Lat] = bd09togcj02(newest_loc.Lng, newest_loc.Lat)
+      return newest_loc;
+    } catch (error) {
+      console.log('map data init error',error)
+    }
   }
 
   // 设置撒点图层

@@ -26,7 +26,8 @@ import {
   CellGroup,
   Switch,
   Field,
-  NumberKeyboard
+  NumberKeyboard,
+  Form,
 } from "vant"
 
 createApp(App)
@@ -50,4 +51,5 @@ createApp(App)
   .use(Switch)
   .use(Field)
   .use(NumberKeyboard)
+  .use(Form)
   .mount('#app')

@@ -4,7 +4,8 @@ export type CommandCodeType =
   "0305" | // GPS上传间隔
   "2815" | // 心率上传间隔
   "9113" | // 体温上传间隔
-  "0079" // 计步器开关
+  "0079" | // 计步器开关
+  "0001" // sos
 
 export interface CommandReq{
   AccessToken:string;

@@ -16,5 +16,6 @@
   div{
     font-size:large;
     margin-top:30px;
+    text-align: center;
   }
 </style>

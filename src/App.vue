@@ -6,7 +6,7 @@
   <van-tabbar placeholder class="tabbar" v-model="active" v-if="showTabbar">
     <van-tabbar-item @touchend="switchPage('health')" icon="like" name="health">健康</van-tabbar-item>
     <van-tabbar-item @touchend="switchPage('map')" icon="map-marked" name="map">地图</van-tabbar-item>
-    <van-tabbar-item @touchend="switchPage('set')" icon="setting" name="setting">设置</van-tabbar-item>
+    <van-tabbar-item @touchend="switchPage('set')" icon="setting" name="set">设置</van-tabbar-item>
   </van-tabbar>
 </template>
 
@@ -49,9 +49,6 @@
     })
     active.value = name;
   }
-  // onMounted(()=>{
-  //   import("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js").then(res => console.log(res))
-  // })
 </script>
 <style lang="scss">
 #app {
