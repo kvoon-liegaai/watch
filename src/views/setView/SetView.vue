@@ -225,7 +225,7 @@
     log('设置紧急联系人请求参数:'),
     sendCommand
   )
-  async function setLinkmans(linkmans:string[]){
+  async function setLinkmans(linkmans:string[]|number[]){
     try {
       // switch start
       isSetting.value = true;
@@ -254,7 +254,6 @@
  </script>
 
 <style lang="scss" scoped>
-
   /*:deep(.van-cell-group__title){
     color:--van-gray-8;
   }*/
