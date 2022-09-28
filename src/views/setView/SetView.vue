@@ -248,8 +248,14 @@
     GPSTimeInterval.value = setting.GPS
     temperatureTimeInterval.value = setting.TEMPERATURE
     heartRateTimeInterval.value = setting.HEARTRATE
-    //@ts-ignore
-    linkmans.push(...setting.LINKMANS);
+    if(setting.LINKMANS){
+      //@ts-ignore
+      linkmans.push(...setting.LINKMANS);
+    }
+    else{
+      //@ts-ignore
+      linkmans.push(...["","",""])
+    }
   })
  </script>
 
