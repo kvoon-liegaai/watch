@@ -19,7 +19,7 @@
     <van-field 
       clearable
       :rules="[{validator:validators.GPS}]"
-      @blur="onInputFinished('0305',GPSTimeInterval, validators.GPS);keyboardStatus.isGPSKBshow = false"
+      @blur="onInputFinished('GPS','0305',GPSTimeInterval, validators.GPS);keyboardStatus.isGPSKBshow = false"
       type="number"
       placeholder="10" label="GPS定位间隔" input-align="right" v-model.number="GPSTimeInterval" clickable
       ref="GPSFieldRef">
@@ -39,7 +39,7 @@
     <van-field
       clearable
       type="number"
-      @blur="onInputFinished('9113',temperatureTimeInterval,validators.temperature);keyboardStatus.isTemperatureKBshow = false"
+      @blur="onInputFinished('TEMPERATURE','9113',temperatureTimeInterval,validators.temperature);keyboardStatus.isTemperatureKBshow = false"
       :rules="[{validator:validators.temperature}]"
       placeholder="10" label="体温测量间隔" input-align="right" v-model.number.lazy="temperatureTimeInterval" clickable>
       <template #right-icon>
@@ -58,7 +58,7 @@
     <van-field
     clearable
     type="number"
-    @blur="onInputFinished('2815',heartRateTimeInterval,validators.heartRate);keyboardStatus.isHeartRateKBshow = false"
+    @blur="onInputFinished('HEARTRATE','2815',heartRateTimeInterval,validators.heartRate);keyboardStatus.isHeartRateKBshow = false"
     :rules="[{validator:validators.heartRate}]"
     placeholder="500" label="心率测量间隔" input-align="right" v-model.number="heartRateTimeInterval" clickable>
       <template #right-icon>
@@ -74,7 +74,7 @@
     /> -->
   </van-cell-group>
 
-  <van-form @submit="setLinkmans" @failed="onFailed">
+  <van-form @submit="setLinkmans(linkmans)" @failed="onFailed">
     <van-cell-group title="紧急联系人" style="background-color:transparent">
       <van-field
       v-for="(linkman, index) in linkmans"
@@ -99,11 +99,9 @@
 </template>
 
 <script setup lang="ts">
-  import {ref, reactive} from "vue"
+  import {ref, reactive, onMounted} from "vue"
   import { sendCommand } from "@/api";
   /* utils */
-  // 键盘显示
-  import {showKB} from "@/utils/keyBoardGroupVis"
   import {genCommandParams} from "@/utils/genReqParams"
   // vant
   import { Notify } from "vant";
@@ -114,6 +112,8 @@
   // FP
   import * as R from "ramda"
   import {log} from "@/utils/FP"
+  // localStorage
+  import {getSetting, saveSetting,savePedometerSetting, saveLinkmansSetting} from "@/utils/auth"
   
   let isSetting = ref<boolean>(false);
   // 数字键盘状态
@@ -135,13 +135,17 @@
   // 心率
   const heartRateTimeInterval = ref<number|undefined>(); // second
   // 联系人
-  const linkmans = reactive(["","",""])
+  let linkmans = reactive<number[]|string[]>([])
   // Field校验函数
   const validators = {
     GPS:(val:FieldValue):true|string => Number(val) > 0 ? true : "请确保间隔时间为正整数",
     temperature:(val:FieldValue):true|string => Number(val) > 0 ? true : "请确保间隔时间为正整数",
     heartRate:(val:FieldValue):true|string => Number(val) >= 300 && Number(val) <= 65535 ? true : "请确保时间在300-65535秒内",
-    linkman:(val:FieldValue):true|string=> /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(String(val)) ? true : "手机号格式有误"
+    linkman:(val:FieldValue):true|string=> {
+      // 如果为空也通过验证
+      if(!val) return true;
+      return /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(String(val)) ? true : "手机号格式有误"
+    }
   }
   // 错误消息
   function onFailed(errInfo:{values:Array<any>,errors:Array<{name:string, message:string}>}){
@@ -168,7 +172,7 @@
       await runPedometerCheckSwitch(targetVal);
       updateCheck(targetVal)
       Notify({type:"success",message:'设置成功'})
-      
+      savePedometerSetting(targetVal);
     } catch (error) {
       Notify({type:"danger",message:`设置失败:${error}`})
     }
@@ -180,7 +184,7 @@
 
 
   // 输入结束
-  async function onInputFinished(code:CommandCodeType, inputVal:FieldValue, validator:(val:FieldValue)=>boolean|string){
+  async function onInputFinished(name:string, code:CommandCodeType, inputVal:FieldValue, validator:(val:FieldValue)=>boolean|string){
     console.log('inputVal',inputVal)
     const checkResult = validator(inputVal);
     if(typeof checkResult === "string"){
@@ -194,6 +198,7 @@
       isSetting.value = true;
       const res = await sendCommand(params);
       console.log('(setting) res',res)
+      saveSetting(name,inputVal)
       Notify({type:"success",message:"设置成功"})
     } catch (error) {
       Notify({type:"danger",message:`${error}`})
@@ -225,6 +230,7 @@
       // switch start
       isSetting.value = true;
       await runSetLinkmans(linkmans);
+      saveLinkmansSetting(linkmans);
       Notify({type:"success",message:'设置成功'})
     } catch (error) {
       Notify({type:"danger",message:`设置失败:${error}`});
@@ -234,6 +240,17 @@
       isSetting.value = false;
     }
   }
+
+  onMounted(()=>{
+    const setting = getSetting();
+    console.log("setting")
+    isPedometerChecked.value = setting.PEDOMETER
+    GPSTimeInterval.value = setting.GPS
+    temperatureTimeInterval.value = setting.TEMPERATURE
+    heartRateTimeInterval.value = setting.HEARTRATE
+    //@ts-ignore
+    linkmans.push(...setting.LINKMANS);
+  })
  </script>
 
 <style lang="scss" scoped>

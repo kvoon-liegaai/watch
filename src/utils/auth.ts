@@ -1,5 +1,5 @@
 import {TokenResult} from "@/api/types"
-
+import * as R from 'ramda'
 
 /* token */
 // save token
@@ -46,4 +46,23 @@ export function removeAuth(){
   localStorage.removeItem("ACCESS_TOKEN");
   localStorage.removeItem("EXPIRE");
   localStorage.removeItem("LOGIN_TIME")
+  //user setting
+  localStorage.removeItem("SETTING");
+}
+
+// user setting
+export const saveSetting =  R.curry((name:string, val:any)=>{
+  try {
+    const setting = JSON.parse((localStorage.getItem("SETTING")||"{}"))
+    setting[name] = val;
+    localStorage.setItem("SETTING", JSON.stringify(setting));
+  } catch (error) {
+    console.log(error)
+  }
+})
+export const savePedometerSetting = saveSetting("PEDOMETER");
+export const saveLinkmansSetting = saveSetting("LINKMANS")
+
+export function getSetting(){
+  return JSON.parse(localStorage.getItem("SETTING")||"{}")
 }
