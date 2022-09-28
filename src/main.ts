@@ -27,6 +27,7 @@ import {
   Switch,
   Field,
   Form,
+  Icon
 } from "vant"
 
 createApp(App)
@@ -50,4 +51,5 @@ createApp(App)
   .use(Switch)
   .use(Field)
   .use(Form)
+  .use(Icon)
   .mount('#app')

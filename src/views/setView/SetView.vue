@@ -79,14 +79,17 @@
       <van-field
       v-for="(linkman, index) in linkmans"
       :key="index"
-      v-model.number="linkmans[index]"
-      type="number"
+      v-model.trim ="linkmans[index]"
+      type="tel"
       center
       clearable
-      :label="'联系人'+(index+1)+'(+86)'"
+      :label="'联系人'+(index+1)"
       placeholder="请输入电话号码"
       :rules="[{validator:validators.linkman}]"
       >
+        <template #left-icon>
+          <van-icon name="friends"/>
+        </template>
       </van-field>
       <div style="margin:16px;">
         <van-button round block size="small" type="primary" native-type="submit">
@@ -104,7 +107,7 @@
   /* utils */
   import {genCommandParams} from "@/utils/genReqParams"
   // vant
-  import { Notify } from "vant";
+  import { Notify} from "vant";
   // types
   import type {CommandCodeType, CommandReq, MyResponse} from "@/api/types"
   import type {FieldInstance } from 'vant';
@@ -135,7 +138,7 @@
   // 心率
   const heartRateTimeInterval = ref<number|undefined>(); // second
   // 联系人
-  let linkmans = reactive<number[]|string[]>([])
+  let linkmans = reactive<string[]>([])
   // Field校验函数
   const validators = {
     GPS:(val:FieldValue):true|string => Number(val) > 0 ? true : "请确保间隔时间为正整数",
@@ -144,7 +147,7 @@
     linkman:(val:FieldValue):true|string=> {
       // 如果为空也通过验证
       if(!val) return true;
-      return /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(String(val)) ? true : "手机号格式有误"
+      return /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(String(val)) || /0\d{2,3}-\d{7,8}|\(?0\d{2,3}[)-]?\d{7,8}|\(?0\d{2,3}[)-]*\d{7,8}/.test(String(val)) ? true : "手机号格式有误"
     }
   }
   // 错误消息
