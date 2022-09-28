@@ -6,65 +6,72 @@
     </div>
   </van-overlay>
 
-  <!-- <van-button type="primary"  @click="run">run</van-button> -->
-  
-
-  <!-- @touchend="onInputFinished('0079',String(isPedometerChecked))" -->
   <van-cell-group insert>
     <!-- 计步器开关 -->
     <van-cell title-class="cell-title" title="开启计步器">
       <template #right-icon>
         <van-switch :model-value="isPedometerChecked" size="24"
-          @update:model-value="onPedometerCheckSwitch"/>  <!--'0079',is-->
+          @update:model-value="onPedometerCheckSwitch"/>
       </template>
     </van-cell>
     <!-- GPS上传时间间隔 -->
+    <!-- @touchstart.stop="showKB(keyboardStatus, 'isGPSKBshow')" -->
     <van-field 
+      clearable
       :rules="[{validator:validators.GPS}]"
-      placeholder="10" label="GPS定位间隔" input-align="right" v-model="GPSTimeInterval" readonly clickable
-      @touchstart.stop="showKB(keyboardStatus, 'isGPSKBshow')"
+      @blur="onInputFinished('0305',GPSTimeInterval, validators.GPS);keyboardStatus.isGPSKBshow = false"
+      type="number"
+      placeholder="10" label="GPS定位间隔" input-align="right" v-model.number="GPSTimeInterval" clickable
       ref="GPSFieldRef">
       <template #right-icon>
         <span>分钟</span>
       </template>
     </van-field>
-    <van-number-keyboard
+    <!-- <van-number-keyboard
       v-model="GPSTimeInterval"
       :show="keyboardStatus.isGPSKBshow"
       :maxlength="6"
       @blur="onInputFinished('0305',GPSTimeInterval, validators.GPS);keyboardStatus.isGPSKBshow = false"
       close-button-text="完成"
-    />
+    /> -->
     <!-- 体温上传时间间隔 -->
+    <!-- @touchstart.stop="showKB(keyboardStatus, 'isTemperatureKBshow')" -->
     <van-field
+      clearable
+      type="number"
+      @blur="onInputFinished('9113',temperatureTimeInterval,validators.temperature);keyboardStatus.isTemperatureKBshow = false"
       :rules="[{validator:validators.temperature}]"
-      placeholder="10" label="体温测量间隔" input-align="right" v-model="temperatureTimeInterval" readonly clickable @touchstart.stop="showKB(keyboardStatus, 'isTemperatureKBshow')">
+      placeholder="10" label="体温测量间隔" input-align="right" v-model.number.lazy="temperatureTimeInterval" clickable>
       <template #right-icon>
         <span>小时</span>
       </template>
     </van-field>
-    <van-number-keyboard
+    <!-- <van-number-keyboard
       v-model="temperatureTimeInterval"
       :show="keyboardStatus.isTemperatureKBshow"
       :maxlength="6"
-      @blur="onInputFinished('9113',GPSTimeInterval,validators.temperature);keyboardStatus.isTemperatureKBshow = false"
+      @blur="onInputFinished('9113',temperatureTimeInterval,validators.temperature);keyboardStatus.isTemperatureKBshow = false"
       close-button-text="完成"
-    />
+    /> -->
     <!-- 心率上传时间间隔 -->
+    <!-- @touchstart.stop="showKB(keyboardStatus,'isHeartRateKBshow')" -->
     <van-field
+    clearable
+    type="number"
+    @blur="onInputFinished('2815',heartRateTimeInterval,validators.heartRate);keyboardStatus.isHeartRateKBshow = false"
     :rules="[{validator:validators.heartRate}]"
-    placeholder="500" label="心率测量间隔" input-align="right" v-model="heartRateTimeInterval" readonly clickable @touchstart.stop="showKB(keyboardStatus,'isHeartRateKBshow')">
+    placeholder="500" label="心率测量间隔" input-align="right" v-model.number="heartRateTimeInterval" clickable>
       <template #right-icon>
         <span>秒</span>
       </template>
     </van-field>
-    <van-number-keyboard
+    <!-- <van-number-keyboard
       v-model="heartRateTimeInterval"
       :show="keyboardStatus.isHeartRateKBshow"
       :maxlength="6"
-      @blur="onInputFinished('2815',GPSTimeInterval,validators.heartRate);keyboardStatus.isHeartRateKBshow = false"
+      @blur="onInputFinished('2815',heartRateTimeInterval,validators.heartRate);keyboardStatus.isHeartRateKBshow = false"
       close-button-text="完成"
-    />
+    /> -->
   </van-cell-group>
 
   <van-form @submit="setLinkmans" @failed="onFailed">
@@ -72,7 +79,8 @@
       <van-field
       v-for="(linkman, index) in linkmans"
       :key="index"
-      v-model="linkmans[index]"
+      v-model.number="linkmans[index]"
+      type="number"
       center
       clearable
       :label="'联系人'+(index+1)+'(+86)'"
@@ -97,10 +105,12 @@
   // 键盘显示
   import {showKB} from "@/utils/keyBoardGroupVis"
   import {genCommandParams} from "@/utils/genReqParams"
-  // types
-  import {CommandCodeType, CommandReq, MyResponse} from "@/api/types"
+  // vant
   import { Notify } from "vant";
-  import type { FieldInstance } from 'vant';
+  // types
+  import type {CommandCodeType, CommandReq, MyResponse} from "@/api/types"
+  import type {FieldInstance } from 'vant';
+  import type {FieldValue} from "@/types/"
   // FP
   import * as R from "ramda"
   import {log} from "@/utils/FP"
@@ -118,20 +128,20 @@
     isPedometerChecked.value = newCheckVal;
   }
   // GPS
-  const GPSTimeInterval = ref<string>("");// minute 
+  const GPSTimeInterval = ref<number|undefined>();// minute 
   const GPSFieldRef = ref<FieldInstance>()
   // 体温
-  const temperatureTimeInterval = ref<string>(""); // hours
+  const temperatureTimeInterval = ref<number|undefined>(); // hours
   // 心率
-  const heartRateTimeInterval = ref<string>(""); // second
+  const heartRateTimeInterval = ref<number|undefined>(); // second
   // 联系人
   const linkmans = reactive(["","",""])
-  // 校验函数
+  // Field校验函数
   const validators = {
-    GPS:(val:string):boolean|string => val ? true : "间隔时间不能为空",
-    temperature:(val:string):boolean|string => val ? true : "间隔时间不能为空",
-    heartRate:(val:string):boolean|string => Number(val) >= 300 && Number(val) <= 65535 ? true : "请确保时间在300-65535秒内",
-    linkman:(val:string):boolean|string=> /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(val) ? true : "手机号格式有误"
+    GPS:(val:FieldValue):true|string => Number(val) > 0 ? true : "请确保间隔时间为正整数",
+    temperature:(val:FieldValue):true|string => Number(val) > 0 ? true : "请确保间隔时间为正整数",
+    heartRate:(val:FieldValue):true|string => Number(val) >= 300 && Number(val) <= 65535 ? true : "请确保时间在300-65535秒内",
+    linkman:(val:FieldValue):true|string=> /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/.test(String(val)) ? true : "手机号格式有误"
   }
   // 错误消息
   function onFailed(errInfo:{values:Array<any>,errors:Array<{name:string, message:string}>}){
@@ -170,13 +180,14 @@
 
 
   // 输入结束
-  async function onInputFinished(code:CommandCodeType, inputVal:string, validator:(val:string)=>boolean|string){
-    const checkResult = validator(inputVal)
+  async function onInputFinished(code:CommandCodeType, inputVal:FieldValue, validator:(val:FieldValue)=>boolean|string){
+    console.log('inputVal',inputVal)
+    const checkResult = validator(inputVal);
     if(typeof checkResult === "string"){
       onFailed({values:[inputVal],errors:[{name:code, message:checkResult}]})
       return
     }
-    const params = genCommandParams(code,inputVal)
+    const params = genCommandParams(code,String(inputVal))
     console.log('(setting):command params',params)
     try {
       // setting start
@@ -226,9 +237,7 @@
  </script>
 
 <style lang="scss" scoped>
-  .cell-title{
-    text-align: left;
-  }
+
   /*:deep(.van-cell-group__title){
     color:--van-gray-8;
   }*/

@@ -28,6 +28,7 @@ import {
   Field,
   NumberKeyboard,
   Form,
+  Divider
 } from "vant"
 
 createApp(App)
@@ -52,4 +53,5 @@ createApp(App)
   .use(Field)
   .use(NumberKeyboard)
   .use(Form)
+  .use(Divider)
   .mount('#app')
