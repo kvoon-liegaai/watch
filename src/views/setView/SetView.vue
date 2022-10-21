@@ -112,9 +112,9 @@
   import type {CommandCodeType, CommandReq, MyResponse} from "@/api/types"
   import type {FieldInstance } from 'vant';
   import type {FieldValue} from "@/types/"
-  // FP
-  import * as R from "ramda"
-  import {log} from "@/utils/FP"
+  // ramda
+  import {pipe, tap} from "ramda"
+  //import {log} from "@/utils/FP"
   // localStorage
   import {getSetting, saveSetting,savePedometerSetting, saveLinkmansSetting} from "@/utils/auth"
   
@@ -162,7 +162,7 @@
    * @params commandValue - 请求命令值
    * */
   const genPedometerCommandParams = genCommandParams("0079");
-  const runPedometerCheckSwitch = R.pipe<boolean[], string, CommandReq, Promise<MyResponse<any>>>(
+  const runPedometerCheckSwitch = pipe<boolean[], string, CommandReq, Promise<MyResponse<any>>>(
     String,
     genPedometerCommandParams,
     sendCommand
@@ -222,10 +222,10 @@
     str += arr[arr.length-1];
     return str;
   }
-  const runSetLinkmans = R.pipe<any[], string, CommandReq, CommandReq, Promise<MyResponse<any>>>(
+  const runSetLinkmans = pipe<any[], string, CommandReq, CommandReq, Promise<MyResponse<any>>>(
     convertArrayToString,
     genLinkMansParams,
-    log('设置紧急联系人请求参数:'),
+    tap((x)=>console.log('设置紧急联系人请求参数:',x)),
     sendCommand
   )
   async function setLinkmans(linkmans:string[]|number[]){

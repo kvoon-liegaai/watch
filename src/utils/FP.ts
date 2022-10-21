@@ -6,8 +6,10 @@
  * @params frontString - 描述字符串
  * @params data - 要打印的值
  */
-import * as R from "ramda"
-export const log = R.curry(<T>(frontString:string, data:T):T=>{
+
+import {curry} from "ramda"
+
+export const log = curry(<T>(frontString:string, data:T):T=>{
     console.log(`${frontString}: `,data);
     return data;
 })

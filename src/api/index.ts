@@ -1,3 +1,5 @@
+import {partial} from "ramda"
+
 import {request} from "./request"
 
 import {
@@ -11,7 +13,7 @@ import {
   BloodOxygenReq,BloodOxygenResult,
   TrackReq, TrackResult
 } from "@/api/types"
-// 
+
 export const sendCommand = async (params:CommandReq):Promise<MyResponse<any>>=>{
   return await request<any>({
     url:"/command/sendcommand",
@@ -23,9 +25,10 @@ export const sendCommand = async (params:CommandReq):Promise<MyResponse<any>>=>{
   })
 }
 
-export const getToken = async (params:TokenReq):Promise<MyResponse<TokenResult>> => {
-  return await request<TokenResult>({
-    url:"/token/get_token",
+
+const getData = async <T,K>(url:string, params:T):Promise<MyResponse<K>>=>{
+  return await request<K>({
+    url,
     method:"POST",
     data:params,
     headers:{
@@ -34,68 +37,16 @@ export const getToken = async (params:TokenReq):Promise<MyResponse<TokenResult>>
   })
 }
 
-export const getHeartRateByTime = async (params:HeartRateReq):Promise<MyResponse<HeartRateResult>> =>{
-  return await request<HeartRateResult>({
-    url:"/heartrate/get_heartrate_bytime",
-    method:"POST",
-    data:params,
-    headers:{
-      'Content-Type': 'application/json'
-    }
-  })
-}
+export const getToken = partial<string, TokenReq, Promise<MyResponse<TokenResult>>>(getData, ["token/get_token"])
 
-export const getTemperatureByTime = async (params:TemperatureReq): Promise<MyResponse<TemperatureResult>>=>{
-  return await request<TemperatureResult>({
-    url:"/temperature/get_temperature_bytime",
-    method:"POST",
-    data:params,
-    headers:{
-      'Content-Type': 'application/json'
-    }
-  })
-}
+export const getHeartRateByTime = partial<string, HeartRateReq, Promise<MyResponse<HeartRateResult>>>(getData, ["/heartrate/get_heartrate_bytime"])
 
-export const getStepsByTime = async (params: StepsReq):Promise<MyResponse<StepsResult>> => {
-  return await request<StepsResult>({
-    url:"/steps/get_steps_bytime",
-    method:"POST",
-    data: params,
-    headers:{
-      'Content-Type' : "application/json"
-    }
-  })
-}
+export const getTemperatureByTime = partial<string, TemperatureReq, Promise<MyResponse<TemperatureResult>>>(getData, ["/temperature/get_temperature_bytime"])
 
-export const getBloodPressureByTime = async (params:BloodPressureReq):Promise<MyResponse<BloodPressureResult>> => {
-  return await request<BloodPressureResult>({
-    url:"/bloodpressure/get_bloodpressure_bytime",
-    method:"POST",
-    data: params,
-    headers:{
-      'Content-Type' : "application/json"
-    }
-  })
-}
+export const getStepsByTime = partial<string, StepsReq, Promise<MyResponse<StepsResult>>>(getData, ["/steps/get_steps_bytime"])
 
-export const getBloodOxygenByTime = async (params:BloodOxygenReq):Promise<MyResponse<BloodOxygenResult>> => {
-  return await request<BloodOxygenResult>({
-    url:"/bloodoxygen/get_bloodoxygen_bytime",
-    method:"POST",
-    data: params,
-    headers:{
-      'Content-Type' : "application/json"
-    }
-  })
-}
+export const getBloodPressureByTime = partial<string, BloodPressureReq, Promise<MyResponse<BloodPressureResult>>>(getData, ["/bloodpressure/get_bloodpressure_bytime"])
 
-export async function getTrack(params:TrackReq):Promise<MyResponse<TrackResult>>{
-  return await request<TrackResult>({
-    url:"/track/get_track_info",
-    method:"POST",
-    data: params,
-    headers:{
-      'Content-Type' : "application/json"
-    }
-  })
-}
+export const getBloodOxygenByTime = partial<string, BloodOxygenReq, Promise<MyResponse<BloodOxygenResult>>>(getData, ["/bloodoxygen/get_bloodoxygen_bytime"])
+
+export const getTrack = partial<string, TrackReq, Promise<MyResponse<TrackResult>>>(getData, ["/track/get_track_info"])

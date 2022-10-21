@@ -1,11 +1,12 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import HealthView from '../views/HealthView.vue'
-import MapView from "@/views/MapView.vue"
+import HealthView from '../views/HealthView/HealthView.vue'
+import MapView from "@/views/MapView/MapView.vue"
 import MdFiveView from "@/views/mdFiveView.vue"
 import BannedView from "@/views/BannedView.vue"
 import SetView from "@/views/setView/SetView.vue"
 
 import {useAuthStore} from "@/stores/authStore"
+
 
 const routes: Array<RouteRecordRaw> = [
   {

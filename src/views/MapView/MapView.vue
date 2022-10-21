@@ -30,12 +30,13 @@
 
 <script setup lang="ts">
   // icon
-  import {Play,PauseOne,Transfer,Repositioning} from "@icon-park/vue-next"
+  import { Play,PauseOne,Transfer,Repositioning } from "@icon-park/vue-next"
   // vueuse
-  import {useEventBus} from "@vueuse/core"
+  import { useEventBus } from "@vueuse/core"
   // types
-  import {Title} from "@/types/"
+  import { Title } from "@/types/"
   import { CommandReq, MyResponse, TrackReq, TrackResult } from "@/api/types";
+  import {Location} from "./types";
   // vue
   import { ref, onMounted, onUnmounted} from "vue";
   // pinia
@@ -47,6 +48,9 @@
   import { getAccessToken, getUserId } from "@/utils/auth";
   // utils
   import throttle from "@/utils/throttle";
+  import {onLoadTimeout} from "@/utils/onLoadTimeout";
+  import {loadJS} from "@/utils/loadJS"
+  import {bd09togcj02} from "@/utils/map/convert"
   // isloading
   let isLoading_wrapper = ref<boolean>(false);
   //dom
@@ -93,6 +97,7 @@
         isLoading_wrapper.value = false;
       }
     },
+    // 命中节流后 callback
     ()=>{
       isLoading_wrapper.value = true;
       setTimeout(()=>{
@@ -102,23 +107,6 @@
     }, 
     5*60*1000,
   )
-
-  // 加载 script 标签 引入aimap
-  function LoadJs(src:string){
-    return new Promise((resolve,reject)=>{
-      let script = document.createElement('script');
-      script.type = "text/javascript";
-      script.src= src;
-      document.body.appendChild(script);
-        
-      script.onload = ()=>{
-        resolve("success");
-      }
-      script.onerror = ()=>{
-        reject("fail");
-      }
-    })
-  }
 
   // 初始化地图
   function initMap(Lng:number, Lat:number){
@@ -272,23 +260,6 @@
     }
   }
 
-  interface Location{
-    Lng:number;
-    Lat:number
-  }
-
-  function bd09togcj02(bd_lng: number, bd_lat: number): number[] {
-    // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
-    const x_PI = 3.14159265358979324 * 3000.0 / 180.0;
-    let x = bd_lng - 0.0065;
-    let y = bd_lat - 0.006;
-    let z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_PI);
-    let theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_PI);
-    let gg_lng = z * Math.cos(theta);
-    let gg_lat = z * Math.sin(theta);
-    return [gg_lng, gg_lat]
-  }
-  
   /**
    * @remarks 
    * 
@@ -358,10 +329,12 @@
     titleBus.emit("地图")
     // 显示加载遮罩
     isLoading_wrapper.value = true;
+    // 超时后取消遮罩
+    onLoadTimeout(isLoading_wrapper, "加载失败", 5000);
     // 加载aimap
     if(!window.aimap){
       try {
-        await LoadJs("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js")
+        await loadJS("https://location-dev.newayz.com/aimap-gl-js/v2.4.0/aimap-gl.js")
       } catch (error) {
       Notify({type:"danger",message:"加载地图组件失败"}) 
         console.log('error 加载地图组件失败',error)

@@ -121,7 +121,7 @@
 
 <script setup lang="ts">
   // 图标
-  import {HeartRate, Thermometer,Foot, Heart, Halo} from "@icon-park/vue-next"// icon park
+  import {HeartRate, Thermometer,Foot} from "@icon-park/vue-next"// icon park
   import {Icon} from "@iconify/vue";
   // vant 组件
   import { Notify } from "vant"
@@ -142,7 +142,10 @@
   import {reqToken} from "@/utils/reqToken"
   import {getAccessToken, getUserId} from "@/utils/auth"
   // utils
-  import {genReqParams as getDataReq}  from "@/utils/genReqParams"// 获取请求参数
+  import {genCommandParams, genReqParams as getDataReq}  from "@/utils/genReqParams"// 获取请求参数
+  import {safeUpdateViewWithArrayData} from "@/utils/viewDom"
+  // ramda
+  import * as R from "ramda"
 
   // 遮罩层
   let isLoading = ref<boolean>(false)
@@ -150,14 +153,9 @@
   const authStore = useAuthStore();
   async function trySendHealthCommand():Promise<void>{
     // prepare params for sendcommand
-    const params:CommandReq = {
-      AccessToken:getAccessToken(),
-      Imei:authStore.Imei,
-      Time:String(Date.now()),
-      CommandCode:"9012", // 9012 健康请求 0039 定位请求
-      ReqId:getUserId()
-    }
-    // try send health command
+    const genHealthCommandParams = genCommandParams("9012")();
+    //@ts-ignore
+    const params:CommandReq = genHealthCommandParams(undefined);
     try {
       // loading status
       isLoading.value = true;
@@ -177,32 +175,43 @@
   //data
   const heartRateData:Ref<string> = ref("0");
   //method
-  async function acquireHeartRate():Promise<void>{
-    const params:HeartRateReq = getDataReq<HeartRateReq>();
-    try  {
-      await healthStore.reqHeartRate(params);
-
-      const length = healthStore.heartRates.length;
-      heartRateData.value = length > 0 ? healthStore.heartRates[length-1].HeartRate : "0";
-    } catch (error) {
-      console.log(error)
+  const acquireHeartRate = R.pipe<any[],HeartRateReq,Promise<any>,Promise<any>,Promise<any>>(
+    getDataReq,
+    healthStore.reqHeartRate, // action
+    R.andThen(()=>{
+      safeUpdateViewWithArrayData(heartRateData, healthStore.heartRates, "HeartRate")
+    }),
+    R.otherwise((error)=>{
+      console.log(error);
       Notify({type:"warning",message:`心率更新异常:${error}`})
-    }
-  }
+    })
+  )
+
   
   /* Temperature */
   const temperatureData:Ref<number> = ref(0);
-  async function acquireTemperature():Promise<void>{
-    const params:TemperatureReq = getDataReq<TemperatureReq>();
-    try {
-      await healthStore.reqTemperature(params);
+  const acquireTemperature = R.pipe<any[],TemperatureReq,Promise<any>,Promise<any>,Promise<any>>(
+    getDataReq,
+    healthStore.reqTemperature, // action
+    R.andThen(()=>{
+      safeUpdateViewWithArrayData(temperatureData, healthStore.temperatures, "Temperature")
+    }),
+    R.otherwise((error)=>{
+      console.log(error);
+      Notify({type:"warning",message:`体温更新异常:${error}`})
+    })
+  )
+  // async function acquireTemperature2():Promise<void>{
+  //   const params:TemperatureReq = getDataReq<TemperatureReq>();
+  //   try {
+  //     await healthStore.reqTemperature(params);
 
-      const length = healthStore.temperatures.length;
-      temperatureData.value = length > 0 ? healthStore.temperatures[length-1].Temperature : 0;
-    } catch (error) {
-      Notify({type:"warning",message:` 体温更新异常:${error}`})
-    }
-  }
+  //     const length = healthStore.temperatures.length;
+  //     temperatureData.value = length > 0 ? healthStore.temperatures[length-1].Temperature : 0;
+  //   } catch (error) {
+  //     Notify({type:"warning",message:` 体温更新异常:${error}`})
+  //   }
+  // }
 
   /*Steps*/
   const stepsData:Ref<number> = ref(0)
